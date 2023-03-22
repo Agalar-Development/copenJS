@@ -1,0 +1,6 @@
+.cache
+.gradle
+.idea
+build/
+node_modules/
+scan.json
