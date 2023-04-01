@@ -123,7 +123,7 @@ const Main = async () => {
 }
 
 const startParser = async () => {
-    exec('java -Xmx4096m -jar ' + __dirname + '/libs/BigJSONServer-1.0-SNAPSHOT.jar', (error, stderr) => {
+    exec('java -Xmx4096m -jar ' + __dirname + '/libs/copenJSParser-1.0-SNAPSHOT.jar', (error, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             return;

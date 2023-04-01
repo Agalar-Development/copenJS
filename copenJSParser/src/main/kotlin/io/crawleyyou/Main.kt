@@ -11,29 +11,35 @@ import kotlinx.serialization.json.*
 
 fun main(args: Array<String>) {
         try {
-            BigJSONReader(args[1], args[0])
+            println("Trying mode ${args[1]} with file ${args[0]}")
+            copenJSParser(args[0], args[1].toInt())
         } catch (e: Exception) {
-            println("No input file specified using sample file and starting scanner Mode: copenJS")
-            BigJSONReader(Paths.get("").toAbsolutePath().parent.toString() + "/scan.json", "copenJS")
+            println("No input file/mode specified using sample file and starting scanner mode: copenJS")
+            copenJSParser(Paths.get("").toAbsolutePath().parent.toString() + "/scan.json", 0)
         }
 }
 
-class BigJSONReader (fileLoc: String, mode: String) {
+@Suppress("CascadeIf")
+class copenJSParser (fileLocation: String, mode: Int) {
     init {
-        if (mode === "copenJS") {
-            JSONReader(fileLoc)
+        if (mode == 0) {
+            ServerReader(fileLocation)
         }
-        else if (mode === "copenGraph") {
-            Reader2(fileLoc)
+        else if (mode == 1) {
+            GraphReader(fileLocation)
+        }
+        else {
+            println("No valid mode specified: $mode")
         }
     }
     @Suppress("FunctionName")
-    private fun JSONReader(args: String) {
+    private fun ServerReader(args: String) {
         var count = 0
         try {
             val client = Socket("localhost", 9532)
             println("Reading file: $args " + LocalDateTime.now().toString())
             FileReader(args).use { reader ->
+                // Do not change this ip extracting method because if we try to parse all data with Json.parseToJsonElement it will give Java heap space error even if the program started with 4GB of memory.
                 val json = reader.readText().split("{   \"ip\": \"")
                 json.forEach { data ->
                     count++
@@ -51,15 +57,17 @@ class BigJSONReader (fileLoc: String, mode: String) {
             println(e)
         }
     }
-    private fun Reader2(args: String) {
+    @Suppress("FunctionName")
+    private fun GraphReader(args: String) {
         try {
             println("Reading file: $args " + LocalDateTime.now().toString())
             FileReader(args).use { reader ->
-                val jsondat = Json.parseToJsonElement(reader.readText())
-                jsondat.jsonArray.forEach { data ->
-                    println(data.jsonObject["IP"])}
+                val jsonElement = Json.parseToJsonElement(reader.readText())
+                jsonElement.jsonArray.forEach { data ->
+                    println(data.jsonObject["ProtocolVersion"]?.jsonPrimitive?.content)
+                }
+                println("Finished reading file: $args " + LocalDateTime.now().toString())
             }
-            println("Finished reading file: $args " + LocalDateTime.now().toString())
         }
         catch (e: Exception) {
             println(e)
