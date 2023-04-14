@@ -46,9 +46,9 @@ masscan
 ```
 If this does not return anything restart the server if it returns something head back to the repository folder then start scanning the entire internet with this command:
 ```bash
-masscan 0.0.0.0/0 -p0-65535 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf
+masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf
 ```
-When the program scan is done you can do the same thing with Method 1.
+When the scan is done you can do the same thing with Method 1.
 
 # Development
 You need any JDK 17 for developing the parser also you can use the same NodeJS version for developing JavaScript.
