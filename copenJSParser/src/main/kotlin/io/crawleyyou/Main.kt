@@ -9,6 +9,14 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.*
 import kotlinx.serialization.json.*
 
+var protocolVersionHashMap = HashMap<String?, Int> ()
+var maxPlayerHashMap = HashMap<String?, Int> ()
+var protocolHashMap = HashMap<String?, Int> ()
+var versionHashMap = HashMap<String?, Int> ()
+
+var dataMaps = mutableListOf("ProtocolVersion", "MaxPlayer", "Protocol", "Version")
+var funMaps = mutableListOf(protocolVersionHashMap, maxPlayerHashMap, protocolHashMap, versionHashMap)
+
 fun main(args: Array<String>) {
         try {
             println("Trying mode ${args[1]} with file ${args[0]}")
@@ -19,7 +27,7 @@ fun main(args: Array<String>) {
         }
 }
 
-@Suppress("CascadeIf")
+@Suppress("CascadeIf", "ClassName")
 class copenJSParser (fileLocation: String, mode: Int) {
     init {
         if (mode == 0) {
@@ -59,18 +67,30 @@ class copenJSParser (fileLocation: String, mode: Int) {
     }
     @Suppress("FunctionName")
     private fun GraphReader(args: String) {
-        try {
-            println("Reading file: $args " + LocalDateTime.now().toString())
-            FileReader(args).use { reader ->
-                val jsonElement = Json.parseToJsonElement(reader.readText())
-                jsonElement.jsonArray.forEach { data ->
-                    println(data.jsonObject["ProtocolVersion"]?.jsonPrimitive?.content)
+        println("Reading file: $args " + LocalDateTime.now().toString())
+        FileReader(args).use { reader ->
+            val jsonElement = Json.parseToJsonElement(reader.readText())
+            jsonElement.jsonArray.forEach { data ->
+                for (map in dataMaps) {
+                    val index = dataMaps.indexOf(map)
+                    when (funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]) {
+                        null -> {
+                            funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
+                        }
+                        else -> {
+                            funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
+                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
+                                    1
+                                )
+                        }
+                    }
                 }
-                println("Finished reading file: $args " + LocalDateTime.now().toString())
             }
-        }
-        catch (e: Exception) {
-            println(e)
+            for (funMapResult in funMaps) {
+                val index = funMaps.indexOf(funMapResult)
+                println("${dataMaps[index]}: $funMapResult")
+            }
+            println("Finished reading file: $args " + LocalDateTime.now().toString())
         }
     }
 }
