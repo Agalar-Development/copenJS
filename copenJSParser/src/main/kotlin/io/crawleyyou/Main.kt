@@ -67,30 +67,37 @@ class copenJSParser (fileLocation: String, mode: Int) {
     }
     @Suppress("FunctionName")
     private fun GraphReader(args: String) {
-        println("Reading file: $args " + LocalDateTime.now().toString())
-        FileReader(args).use { reader ->
-            val jsonElement = Json.parseToJsonElement(reader.readText())
-            jsonElement.jsonArray.forEach { data ->
-                for (map in dataMaps) {
-                    val index = dataMaps.indexOf(map)
-                    when (funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]) {
-                        null -> {
-                            funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
-                        }
-                        else -> {
-                            funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
-                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
-                                    1
-                                )
+        try {
+            println("Reading file: $args " + LocalDateTime.now().toString())
+            FileReader(args).use { reader ->
+                val jsonElement = Json.parseToJsonElement(reader.readText())
+                jsonElement.jsonArray.forEach { data ->
+                    for (map in dataMaps) {
+                        val index = dataMaps.indexOf(map)
+                        when (funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]) {
+                            null -> {
+                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
+                            }
+
+                            else -> {
+                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
+                                    funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
+                                        1
+                                    )
+                            }
                         }
                     }
                 }
+                for (funMapResult in funMaps) {
+                    val index = funMaps.indexOf(funMapResult)
+                    File("${dataMaps[index]}.txt").bufferedWriter().use { out ->
+                        out.write("$funMapResult")
+                    }
+                }
+                println("Finished reading file: $args " + LocalDateTime.now().toString())
             }
-            for (funMapResult in funMaps) {
-                val index = funMaps.indexOf(funMapResult)
-                println("${dataMaps[index]}: $funMapResult")
-            }
-            println("Finished reading file: $args " + LocalDateTime.now().toString())
+        } catch (e: Exception) {
+            println(e)
         }
     }
 }
