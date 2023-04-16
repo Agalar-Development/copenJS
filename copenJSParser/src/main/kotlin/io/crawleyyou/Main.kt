@@ -8,6 +8,7 @@ import java.nio.file.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.*
 import kotlinx.serialization.json.*
+import kotlinx.serialization.*
 
 var protocolVersionHashMap = HashMap<String?, Int> ()
 var maxPlayerHashMap = HashMap<String?, Int> ()
@@ -15,7 +16,7 @@ var protocolHashMap = HashMap<String?, Int> ()
 var versionHashMap = HashMap<String?, Int> ()
 
 var dataMaps = mutableListOf("ProtocolVersion", "MaxPlayer", "Protocol", "Version")
-var funMaps = mutableListOf(protocolVersionHashMap, maxPlayerHashMap, protocolHashMap, versionHashMap)
+var hashMaps = mutableListOf(protocolVersionHashMap, maxPlayerHashMap, protocolHashMap, versionHashMap)
 
 fun main(args: Array<String>) {
         try {
@@ -74,24 +75,25 @@ class copenJSParser (fileLocation: String, mode: Int) {
                 jsonElement.jsonArray.forEach { data ->
                     for (map in dataMaps) {
                         val index = dataMaps.indexOf(map)
-                        when (funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]) {
+                        when (hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]) {
                             null -> {
-                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
+                                hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
                             }
 
                             else -> {
-                                funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
-                                    funMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
+                                hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
+                                    hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
                                         1
                                     )
                             }
                         }
                     }
                 }
-                for (funMapResult in funMaps) {
-                    val index = funMaps.indexOf(funMapResult)
-                    File("${dataMaps[index]}.txt").bufferedWriter().use { out ->
-                        out.write("$funMapResult")
+                for (hasMapResult in hashMaps) {
+                    val index = hashMaps.indexOf(hasMapResult)
+                    val data = Json.encodeToString(hasMapResult)
+                    File("${dataMaps[index]}.json").bufferedWriter().use { out ->
+                        out.write(data)
                     }
                 }
                 println("Finished reading file: $args " + LocalDateTime.now().toString())
