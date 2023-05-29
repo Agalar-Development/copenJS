@@ -3,5 +3,8 @@
 		"tcp-servport": 9532,
         "webhook": "Insert Webhook Here",
         "mongolink": "mongodb://"
+    },
+    "Chart": {
+        "port": 9533
     }
 }
