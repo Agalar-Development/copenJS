@@ -79,7 +79,6 @@ class copenJSParser (fileLocation: String, mode: Int) {
                             null -> {
                                 hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] = 1
                             }
-
                             else -> {
                                 hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content] =
                                     hashMaps[index][data.jsonObject[map]?.jsonPrimitive?.content]!!.plus(
@@ -89,9 +88,9 @@ class copenJSParser (fileLocation: String, mode: Int) {
                         }
                     }
                 }
-                for (hasMapResult in hashMaps) {
-                    val index = hashMaps.indexOf(hasMapResult)
-                    val data = Json.encodeToString(hasMapResult)
+                for (hashMapResult in hashMaps) {
+                    val index = hashMaps.indexOf(hashMapResult)
+                    val data = Json.encodeToString(hashMapResult.toList().toTypedArray())
                     File("${dataMaps[index]}.json").bufferedWriter().use { out ->
                         out.write(data)
                     }
