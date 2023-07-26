@@ -28,17 +28,19 @@ fun main(args: Array<String>) {
         }
 }
 
-@Suppress("CascadeIf", "ClassName")
+@Suppress("ClassName")
 class copenJSParser (fileLocation: String, mode: Int) {
     init {
-        if (mode == 0) {
-            ServerReader(fileLocation)
-        }
-        else if (mode == 1) {
-            GraphReader(fileLocation)
-        }
-        else {
-            println("No valid mode specified: $mode")
+        when (mode) {
+            0 -> {
+                ServerReader(fileLocation)
+            }
+            1 -> {
+                GraphReader(fileLocation)
+            }
+            else -> {
+                println("No valid mode specified: $mode")
+            }
         }
     }
     @Suppress("FunctionName")
