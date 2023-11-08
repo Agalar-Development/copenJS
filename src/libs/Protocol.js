@@ -4,7 +4,6 @@ let version;
 
 const GetServerData = (ip, port) => new Promise(async (resolve, reject) => {
     try {
-         console.log("Trying Pinging IP: " + ip)
         await protocol.ping({
             host: ip,
             port: port

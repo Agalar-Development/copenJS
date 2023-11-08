@@ -57,7 +57,7 @@ class copenJSParser (fileLocation: String, mode: Int) {
                     val ip = data.split('"')[0]
                     println("Current IP: $ip")
                     client.outputStream.write(ip.toByteArray())
-                    TimeUnit.MILLISECONDS.sleep(50)
+                    TimeUnit.MILLISECONDS.sleep(5)
                 }
                 println("$count IP's processed. " + LocalDateTime.now().toString())
             }
