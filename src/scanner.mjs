@@ -5,7 +5,12 @@ import cprocess from "child_process"
 import spinners from "cli-spinners"
 import ora from 'ora'
 import os from "os"
-
+import log4js from "log4js"
+log4js.configure({
+    appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" } },
+    categories: { default: { appenders: ["copenjs"], level: "debug" } },
+});
+var logger = log4js.getLogger("copenJS");
 var server = net.createServer()
 
 const servport = config.Scanner['tcp-servport']
@@ -61,6 +66,7 @@ const Main = async () => {
         currData.subprocesses = os.availableParallelism()
         for (var i = 0; i < os.availableParallelism(); i++) {
             processList.push(cprocess.fork("./libs/thread.mjs", [i]))
+            logger.debug("Process: " + processList[i].pid + " started")
             assignedList.push([i, { currentIp: "", lastresponsetext: 0, status: "Idle", assigned: 0, finds: 0, total: 0 }])
         }
         for (var i = 0; i < processList.length; i++) {
@@ -75,11 +81,13 @@ const Main = async () => {
                     assignedList[x][1].finds++
                     assignedList[x][1].assigned--
                     assignedList[x][1].lastresponsetext = parseInt(Date.now()) - data.time
+                    logger.debug(processList[assignedList[x][0]].pid + " processed data from ip: " + assignedList[x][1].currentIp);
                 }
                 else if (data.status === "error") {
                     currData.assigned--
                     assignedList[x][1].assigned--
                     assignedList[x][1].lastresponsetext = parseInt(Date.now()) - data.time
+                    logger.debug(processList[assignedList[x][0]].pid + " failed to processing ip: " + assignedList[x][1].currentIp);
                 }
             })
         }
@@ -103,13 +111,16 @@ const Main = async () => {
     server.on("connection", function (socket) {
         socket.on('error', function (err) {
             console.log("Client lost connection")
+            logger.warn("The client lost the connection " + err)
         })
-        socket.on('end', function () {
+        socket.on('end', function (data) {
             console.log("Client disconnected")
+            logger.warn("The client end " + err)
         })
         socket.on("data", async function (ip) {
             assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
             processList[assignedList[0][0]].send({ ip: ip.toString(), time: Date.now() })
+            logger.debug(processList[assignedList[0][0]].pid + " assigned to " + ip.toString());
             assignedList[0][1].currentIp = ip.toString()
             assignedList[0][1].assigned++
             assignedList[0][1].total++
