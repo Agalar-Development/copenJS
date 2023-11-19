@@ -62,7 +62,7 @@ class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
                     else if (startStatus) {
                         println("Current IP: $ip")
                         client.outputStream.write(ip.toByteArray())
-                        TimeUnit.MILLISECONDS.sleep(10)
+                        TimeUnit.MILLISECONDS.sleep(5)
                     }
                 }
                 println("$count IP's processed. " + LocalDateTime.now().toString())

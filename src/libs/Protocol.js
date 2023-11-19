@@ -10,10 +10,10 @@ const GetServerData = (ip, port) => new Promise(async (resolve, reject) => {
         }).then((data) => {
             resolve(data)
         }).catch((err) => {
-            reject(err)
+            reject("error")
         })
     } catch (err) {
-        reject(err)
+        reject("error")
     }
 })
 
