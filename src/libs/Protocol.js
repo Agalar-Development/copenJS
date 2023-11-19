@@ -4,17 +4,16 @@ let version;
 
 const GetServerData = (ip, port) => new Promise(async (resolve, reject) => {
     try {
-         console.log("Trying Pinging IP: " + ip)
         await protocol.ping({
             host: ip,
             port: port
         }).then((data) => {
             resolve(data)
         }).catch((err) => {
-            reject(err)
+            reject("error")
         })
     } catch (err) {
-        reject(err)
+        reject("error")
     }
 })
 

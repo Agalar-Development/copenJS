@@ -20,8 +20,8 @@ var hashMaps = mutableListOf(protocolVersionHashMap, maxPlayerHashMap, protocolH
 
 fun main(args: Array<String>) {
         try {
-            println("Trying mode ${args[1]} with file ${args[0]}")
-            copenJSParser(args[0], args[1].toInt())
+            println("Starting mode ${args[1]} with file ${args[0]}")
+            copenJSParser(args[0], args[1].toInt(), args[2])
         } catch (e: Exception) {
             println("No input file/mode specified using sample file and starting scanner mode: copenJS")
             copenJSParser(Paths.get("").toAbsolutePath().parent.toString() + "/scan.json", 0)
@@ -29,11 +29,11 @@ fun main(args: Array<String>) {
 }
 
 @Suppress("ClassName")
-class copenJSParser (fileLocation: String, mode: Int) {
+class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
     init {
         when (mode) {
             0 -> {
-                ServerReader(fileLocation)
+                ServerReader(fileLocation, extra)
             }
             1 -> {
                 GraphReader(fileLocation)
@@ -44,8 +44,9 @@ class copenJSParser (fileLocation: String, mode: Int) {
         }
     }
     @Suppress("FunctionName")
-    private fun ServerReader(args: String) {
+    private fun ServerReader(args: String, startFrom: String?) {
         var count = 0
+        var startStatus = false
         try {
             val client = Socket("localhost", 9532)
             println("Reading file: $args " + LocalDateTime.now().toString())
@@ -55,9 +56,14 @@ class copenJSParser (fileLocation: String, mode: Int) {
                 json.forEach { data ->
                     count++
                     val ip = data.split('"')[0]
-                    println("Current IP: $ip")
-                    client.outputStream.write(ip.toByteArray())
-                    TimeUnit.MILLISECONDS.sleep(50)
+                    if (startFrom == ip) {
+                        startStatus = true
+                    }
+                    else if (startStatus) {
+                        println("Current IP: $ip")
+                        client.outputStream.write(ip.toByteArray())
+                        TimeUnit.MILLISECONDS.sleep(5)
+                    }
                 }
                 println("$count IP's processed. " + LocalDateTime.now().toString())
             }
