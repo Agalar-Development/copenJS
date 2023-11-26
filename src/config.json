@@ -1,10 +1,16 @@
 {
     "Scanner": {
+        "mode": "default",
 		"tcp-servport": 9532,
+        "logger": "info",
         "webhook": "Insert Webhook Here",
         "mongolink": "mongodb://"
     },
     "Chart": {
         "port": 9533
+    },
+    "timings" : {
+       "maxresponse": "4000",
+       "avgresponse": "2000"
     }
 }

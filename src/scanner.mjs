@@ -7,13 +7,14 @@ import ora from 'ora'
 import os from "os"
 import log4js from "log4js"
 log4js.configure({
-    appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" } },
-    categories: { default: { appenders: ["copenjs"], level: "debug" } },
+    appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" }, console: { type: "stdout" } },
+    categories: { default: { appenders: ["copenjs", "out"], level: config.Scanner.logger } },
 });
 var logger = log4js.getLogger("copenJS");
 var server = net.createServer()
 
 const servport = config.Scanner['tcp-servport']
+let masscanStatus = false
 
 let currData = {
     lastIp: "",
@@ -31,6 +32,12 @@ let processList = []
 let assignedList = []
 var text = ora()
 text.spinner = spinners.dots13
+
+const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf", (process.cwd().split("/src"))).then((process) => {
+    process.on("exit", () => {
+        serverScanner()
+    })
+})
 
 const getColor = (data, mode) => {
     switch (mode) {
@@ -102,10 +109,10 @@ const createProcessConnection = (i) => {
     })
 }
 
-const Main = async () => {
+const serverScanner = async () => {
     server.listen(servport, function () {
-        console.log("Server listening on " + servport)
-        console.log("There is " + os.availableParallelism() + " thread available on this server.")
+        logger.info("Server listening on " + servport)
+        logger.info("There is " + os.availableParallelism() + " thread available on this server.")
         currData.subprocesses = os.availableParallelism()
         for (var i = 0; i < os.availableParallelism(); i++) {
             processList.push([cprocess.fork("./libs/thread.mjs", [i]), []])
@@ -115,9 +122,9 @@ const Main = async () => {
         for (var i = 0; i < processList.length; i++) {
             createProcessConnection(i)
         }
-        console.log("Parser will be started in 3 seconds...")
+        logger.info("Parser will be started in 3 seconds...")
         setTimeout(() => {
-            startParser('java -Xmx5G -jar ' + process.cwd() + '/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar')
+            startProcess('java -Xmx5G -jar ' + process.cwd() + '/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar')
             setInterval(async () => {
                 assignedList.sort((a, b) => { return a[0] - b[0] })
                 let defaultText = `Main Process: \n   Current IP/s: ${(currData.total - currData.totalLast) * 2} IP/s \n   Total Assigned: ${currData.assigned} \n   Total TCP Restarts: ${currData.tcpRestarts} \n   Total Finds & Total Try: ${currData.finds} & ${currData.total} \n   Current Rate: ${((currData.finds / currData.total) * 100).toFixed(2)}% \n   Total Sub-Processes: ${currData.subprocesses} \n   Current IP: ${currData.lastIp} \nSub-Processes: `
@@ -145,7 +152,7 @@ const Main = async () => {
                 for (var i = 0; i < processList.length; i++) {
                     if (assignedList[i][1].currentPings > 5) {
                         logger.info("Restarting Thread: " + assignedList[i][0]),
-                        processList[assignedList[i][0]][0].kill("SIGINT")
+                            processList[assignedList[i][0]][0].kill("SIGINT")
                         processList[assignedList[i][0]][0] = cprocess.fork("./libs/thread.mjs", [assignedList[i][0]])
                         assignedList[i][1].restarts++
                         processList[assignedList[i][0]][1].shift()
@@ -164,13 +171,11 @@ const Main = async () => {
     })
     server.on("connection", function (socket) {
         socket.on('error', function (err) {
-            console.log("Client lost connection")
             logger.warn("The client lost the connection " + err)
-            startParser('java -Xmx5G -jar ' + process.cwd() + `/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar "${process.cwd().split("src") + "scan.json"}" 0 "` + currData.lastIp + '"')
+            startProcess('java -Xmx5G -jar ' + process.cwd() + `/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar "${process.cwd().split("src") + "scan.json"}" 0 "` + currData.lastIp + '"')
             currData.tcpRestarts++
         })
         socket.on('end', function () {
-            console.log("Client disconnected")
             logger.warn("The client end ")
         })
         socket.on("data", async function (ip) {
@@ -196,17 +201,64 @@ const Main = async () => {
     })
 }
 
-const startParser = async (startup) => {
-    exec(startup, (error, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            logger.error("exec error: " + error)
-            return;
-        }
-        console.error(`stderr: ${stderr}`);
-        logger.error("stderr: " + stderr)
-    })
+const startProcess = async (startup, cwd) => {
+    cwd = cwd || process.cwd()
+    return exec(startup, { cwd: cwd })
 }
 
+const Main = async () => {
+    switch (config.Scanner.mode) {
+        case "default":
+            startProcess("masscan").then((data) => {
+                data.stdout.on("data", (data) => {
+                    logger.debug(data)
+                    if (data.includes("usage: masscan") && data.includes("examples:")) {
+                        logger.debug("masscan is already installed")
+                        masscanStatus = true
+                    }
+                })
+                data.on("exit", () => {
+                    logger.debug("Check process is ended")
+                    if (!masscanStatus) {
+                        logger.info("masscan is not installed trying to install it.")
+                        startProcess("sudo apt-get --assume-yes install git make gcc && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan").then((data) => {
+                            data.stdout.on("data", (data) => {
+                                logger.debug(data)
+                                if (data.includes("usage: masscan") && data.includes("examples:")) {
+                                    logger.info("Installation of masscan is successful!")
+                                    masscanStatus = true
+                                }
+                            })
+                            data.on("exit", () => {
+                                logger.debug("Install process is ended")
+                                if (!masscanStatus) {
+                                    logger.error("An error occured while installing masscan! Please install it manually and select mode masscan")
+                                }
+                                else {
+                                    logger.debug("Starting masscan")
+                                    startMasscan()
+                                }
+                            })
+                        })
+                    }
+                    else {
+                        logger.debug("Starting masscan")
+                        startMasscan()
+                    }
+                })
+            })
+            break;
+        case "masscan":
+            logger.debug("Starting masscan")
+            startMasscan()
+            break;
+        case "server":
+            logger.debug("Starting Server Scanner")
+            serverScanner()
+            break;
+        default:
+            logger.error("Invalid mode! Please check your config.json file.")
+    }
+}
 
 Main()
