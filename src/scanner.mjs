@@ -8,7 +8,7 @@ import os from "os"
 import log4js from "log4js"
 log4js.configure({
     appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" }, console: { type: "stdout" } },
-    categories: { default: { appenders: ["copenjs", "out"], level: config.Scanner.logger } },
+    categories: { default: { appenders: ["copenjs", "console"], level: config.Scanner.logger } },
 });
 var logger = log4js.getLogger("copenJS");
 var server = net.createServer()
@@ -33,9 +33,9 @@ let assignedList = []
 var text = ora()
 text.spinner = spinners.dots13
 
-const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf", (process.cwd().split("/src"))).then((process) => {
-    process.stdout.on("data", (data) => {
-        console.log(data)
+const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf", (process.cwd().split("/src")[0])).then((process) => {
+    process.stderr.on("data", (data) => {
+        logger.debug(data)
     })
     process.on("exit", () => {
         serverScanner()
@@ -224,7 +224,7 @@ const Main = async () => {
                     logger.debug("Check process is ended")
                     if (!masscanStatus) {
                         logger.info("masscan is not installed trying to install it.")
-                        startProcess("sudo apt-get --assume-yes install git make gcc && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan").then((data) => {
+                        startProcess("sudo apt-get --assume-yes install git make gcc && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan", (process.cwd().split("/src")[0])).then((data) => {
                             data.stdout.on("data", (data) => {
                                 logger.debug(data)
                                 if (data.includes("usage: masscan") && data.includes("examples:")) {
