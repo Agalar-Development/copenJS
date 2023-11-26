@@ -34,6 +34,9 @@ var text = ora()
 text.spinner = spinners.dots13
 
 const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf", (process.cwd().split("/src"))).then((process) => {
+    process.stdout.on("data", (data) => {
+        console.log(data)
+    })
     process.on("exit", () => {
         serverScanner()
     })
