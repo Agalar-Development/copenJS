@@ -37,8 +37,17 @@ const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json
     process.stderr.on("data", (data) => {
         logger.debug(data)
     })
-    process.on("exit", () => {
+    process.on("exit", (code, signal) => {
+        logger.debug("Process is closed with code: " + code)
+        logger.debug(signal)
         serverScanner()
+    })
+    process.on("close", (code, signal) => {
+        logger.debug("Masscan is ended all stdio connections with code: " + code)
+        logger.debug("Signal: " + signal)
+    })
+    process.on("disconnect", (err) => {
+        logger.debug("Masscan is disconnected with error: " + err)
     })
 })
 
