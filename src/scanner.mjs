@@ -215,7 +215,7 @@ const serverScanner = async () => {
 
 const startProcess = async (startup, cwd) => {
     cwd = cwd || process.cwd()
-    return exec(startup, { cwd: cwd })
+    return exec(startup, { cwd: cwd, maxBuffer: 1024 * 1024 * 1024 })
 }
 
 const Main = async () => {
