@@ -35,7 +35,7 @@ text.spinner = spinners.dots13
 
 const startMasscan = () => startProcess("masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf", (process.cwd().split("/src")[0])).then((process) => {
     process.stderr.on("data", (data) => {
-        logger.debug(data)
+        logger.info(data)
     })
     process.on("exit", (code, signal) => {
         logger.debug("Process is closed with code: " + code)
@@ -233,7 +233,7 @@ const Main = async () => {
                     logger.debug("Check process is ended")
                     if (!masscanStatus) {
                         logger.info("masscan is not installed trying to install it.")
-                        startProcess("sudo apt-get --assume-yes install git make gcc && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan", (process.cwd().split("/src")[0])).then((data) => {
+                        startProcess("sudo apt-get --assume-yes install git make gcc openjdk-17-jdk openjdk-17-jre && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan", (process.cwd().split("/src")[0])).then((data) => {
                             data.stdout.on("data", (data) => {
                                 logger.debug(data)
                                 if (data.includes("usage: masscan") && data.includes("examples:")) {

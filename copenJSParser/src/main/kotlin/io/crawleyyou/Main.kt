@@ -47,6 +47,9 @@ class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
     private fun ServerReader(args: String, startFrom: String?) {
         var count = 0
         var startStatus = false
+        if (startFrom == "null") {
+            startStatus = true
+        }
         try {
             val client = Socket("localhost", 9532)
             println("Reading file: $args " + LocalDateTime.now().toString())
