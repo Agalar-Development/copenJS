@@ -1,8 +1,8 @@
 import axios from "axios"
 import config from '../config.json' assert { type: "json" }
-const webhook = config.Scanner.webhook
+const webhook = config.scanner.webhook
 
-async function WebhookSender(serverip, serverversion, protocolversion, motd, latency, favicon, timestamp, max, online, mod) {
+async function WebhookSender(serverip, serverversion, protocolversion, motd, latency, favicon, timestamp, max, online, mod, country) {
     await axios.post(webhook, {
             username: "copenJS",
             content: "",
@@ -43,6 +43,11 @@ async function WebhookSender(serverip, serverversion, protocolversion, motd, lat
                     {
                         name: `Latency to Scanner Server:`,
                         value: latency + `ms`,
+                        inline: true
+                    },
+                    {
+                        name: `Country:`,
+                        value: `:flag_` + country.toLowerCase() + `: ` + country,
                         inline: true
                     },
                 ],

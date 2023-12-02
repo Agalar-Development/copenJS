@@ -3,7 +3,7 @@ const {
 } = require('mongodb');
 const System = require('./Log.js');
 const config = require('../config.json');
-const client = new MongoClient(config.Scanner.mongolink)
+const client = new MongoClient(config.scanner.mongolink)
 const db = client.db("Scanner")
 
 function Connect() {

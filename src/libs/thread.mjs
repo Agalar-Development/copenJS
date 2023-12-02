@@ -1,6 +1,7 @@
 import protocol from './Protocol.js'
 import webhook from './webhookHelper.mjs'
 import Database from './Mongo.js'
+import axios from "axios"
 
 const currentThread = process.argv[2]
 
@@ -15,9 +16,10 @@ process.on("message", (data) => {
             var ip = data.ip
             try {
                 protocol.GetServerData(ip.toString(), 25565).then(async (data) => {
+                    var ipAPI = await axios.get(`http://ip-api.com/json/${ip.toString()}?fields=status,message,country,countryCode,region,city,district,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting`)
                     try {
                         process.send({ ip: ip.toString(), status: "success", thread: currentThread, time: time })
-                        if (data.players.online > 0) await webhook(ip.toString(), data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://minecraft.global/images/icons/default_favicon.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false)
+                        if (data.players.online > 0) await webhook(ip.toString(), data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://media.minecraftforum.net/attachments/300/619/636977108000120237.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI.data?.countryCode ?? null)
                         Database.MongoLogger({
                             IP: ip.toString(),
                             Version: data.version.name,
@@ -30,7 +32,8 @@ process.on("message", (data) => {
                             MaxPlayer: data.players.max,
                             OnlinePlayer: data.players.online,
                             Players: data.players.sample,
-                            Modinfo: data.modinfo
+                            Modinfo: data.modinfo,
+                            ipAPI: ipAPI.data
                         }, "Servers")
                     }
                     catch (err) {

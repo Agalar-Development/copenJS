@@ -1,16 +1,24 @@
 {
-    "Scanner": {
+    "masscan": {
+        "port": 25565,
+        "rate": 1200000,
+        "outputFile": "scan.json",
+        "excludeFile": "exclude.conf"
+    },
+    "scanner": {
         "mode": "default",
 		"tcp-servport": 9532,
-        "logger": "info",
-        "webhook": "Insert Webhook Here",
-        "mongolink": "mongodb://"
+        "logger": "debug",
+        "parserMaxRam": 5,
+        "processMaxBuffer": 1,
+        "webhook": "",
+        "mongolink": ""
     },
-    "Chart": {
+    "chart": {
         "port": 9533
     },
     "timings" : {
-       "maxresponse": "4000",
-       "avgresponse": "2000"
+       "maxresponse": 110000,
+       "avgresponse": 2000
     }
 }
