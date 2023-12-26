@@ -16,10 +16,10 @@ process.on("message", (data) => {
             var ip = data.ip
             try {
                 protocol.GetServerData(ip.toString(), 25565).then(async (data) => {
-                    var ipAPI = await axios.get(`http://ip-api.com/json/${ip.toString()}?fields=status,message,country,countryCode,region,city,district,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting`)
+                    var ipAPI = await axios.get(`http://ip-api.com/json/${ip.toString()}?fields=message,country,countryCode,region,city,district,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting`).then((response) => response.data).catch((err) => "IP-API Error")
                     try {
                         process.send({ ip: ip.toString(), status: "success", thread: currentThread, time: time })
-                        if (data.players.online > 0) await webhook(ip.toString(), data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://media.minecraftforum.net/attachments/300/619/636977108000120237.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI.data?.countryCode ?? null)
+                        if (data.players.online > 0) await webhook(ip.toString(), data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://media.minecraftforum.net/attachments/300/619/636977108000120237.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI?.countryCode ?? null)
                         Database.MongoLogger({
                             IP: ip.toString(),
                             Version: data.version.name,
@@ -33,7 +33,7 @@ process.on("message", (data) => {
                             OnlinePlayer: data.players.online,
                             Players: data.players.sample,
                             Modinfo: data.modinfo,
-                            ipAPI: ipAPI.data
+                            ipAPI: ipAPI
                         }, "Servers")
                     }
                     catch (err) {

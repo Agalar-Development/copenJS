@@ -23,13 +23,15 @@ let currData = {
     finds: 0,
     subprocesses: 0,
     assigned: 0,
-    totalLast: 0
+    totalLast: 0,
+    crashedTotal: 0
 }
 
 var colors = ["\x1b[31m", "\x1b[32m", "\x1b[33m"]
 
 let processList = []
 let assignedList = []
+let crashedList = []
 var text = ora()
 text.spinner = spinners.dots13
 
@@ -76,6 +78,27 @@ const getColor = (data, mode) => {
             }
         default:
             return null
+    }
+}
+
+const sendIPtoProcess = (ip) => {
+    assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
+    var x = 0
+    while (assignedList[x][1]?.currentPings > 5 && x < os.availableParallelism()) {
+        x++
+    }
+    if (x === os.availableParallelism()) {
+        logger.fatal("All Processes are down!")
+    }
+    else {
+        processList[assignedList[x][0]][0].send({ mode: "search", ip: ip.toString(), time: Date.now() })
+        processList[assignedList[x][0]][1].push(ip.toString())
+        logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + ip.toString())
+        assignedList[x][1].assigned++
+        assignedList[x][1].total++
+        currData.lastIp = ip.toString()
+        currData.total++
+        currData.assigned++
     }
 }
 
@@ -161,17 +184,16 @@ const serverScanner = async () => {
                 for (var i = 0; i < processList.length; i++) {
                     if (assignedList[i][1].currentPings > 5) {
                         logger.info("Restarting Thread: " + assignedList[i][0]),
-                            processList[assignedList[i][0]][0].kill("SIGINT")
+                        processList[assignedList[i][0]][0].kill("SIGINT")
                         processList[assignedList[i][0]][0] = cprocess.fork("./libs/thread.mjs", [assignedList[i][0]])
                         assignedList[i][1].restarts++
                         processList[assignedList[i][0]][1].shift()
-                        assignedList[i][1].assigned--
-                        currData.assigned--
+                        currData.assigned -= assignedList[i][1].assigned
+                        currData.crashedTotal += assignedList[i][1].assigned
+                        assignedList[i][1].assigned = 0
                         createProcessConnection(assignedList[i][0])
-                        processList[assignedList[i][0]][1].forEach((data) => {
-                            processList[assignedList[i][0]][0].send({ mode: "search", ip: data, time: Date.now() })
-                            processList[assignedList[i][0]][1].shift()
-                        });
+                        crashedList.push(processList[assignedList[i][0]][1])
+                        processList[assignedList[i][0]][1] = []
                         assignedList[i][1].currentPings = 0
                     }
                 }
@@ -185,27 +207,15 @@ const serverScanner = async () => {
             currData.tcpRestarts++
         })
         socket.on('end', function () {
-            logger.warn("The client end ")
+            logger.warn("The client end")
+            if (!crashedList.length == 0) {
+                logger.info("There is a list of ips that sent to the processes which is crashed. Re-running " + currData.crashedTotal + " ips.")
+                currData.crashedTotal = 0
+                cprocess.fork("./libs/crash.js").send({ list: crashedList })
+            }
         })
         socket.on("data", async function (ip) {
-            assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
-            var x = 0
-            while (assignedList[x][1]?.currentPings > 5 && x < os.availableParallelism()) {
-                x++
-            }
-            if (x === os.availableParallelism()) {
-                logger.fatal("All Processes are down!")
-            }
-            else {
-                processList[assignedList[x][0]][0].send({ mode: "search", ip: ip.toString(), time: Date.now() })
-                processList[assignedList[x][0]][1].push(ip.toString())
-                logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + ip.toString());
-                assignedList[x][1].assigned++
-                assignedList[x][1].total++
-                currData.lastIp = ip.toString()
-                currData.total++
-                currData.assigned++
-            }
+            sendIPtoProcess(ip)
         })
     })
 }
