@@ -212,6 +212,7 @@ const serverScanner = async () => {
                 logger.info("There is a list of ips that sent to the processes which is crashed. Re-running " + currData.crashedTotal + " ips.")
                 currData.crashedTotal = 0
                 cprocess.fork("./libs/crash.js").send({ list: crashedList })
+                crashedList = []
             }
         })
         socket.on("data", async function (ip) {
