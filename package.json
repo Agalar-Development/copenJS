@@ -16,6 +16,7 @@
     "minecraft-data": "^3.30.0",
     "minecraft-protocol": "^1.41.1",
     "mongodb": "^5.1.0",
-    "ora": "^7.0.1"
+    "ora": "^7.0.1",
+    "ws": "^8.16.0"
   }
 }

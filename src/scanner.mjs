@@ -6,12 +6,27 @@ import spinners from "cli-spinners"
 import ora from 'ora'
 import os from "os"
 import log4js from "log4js"
+import WebSocket from "ws"
+
 log4js.configure({
     appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" }, console: { type: "stdout" } },
     categories: { default: { appenders: ["copenjs", "console"], level: config.scanner.logger } },
 });
 var logger = log4js.getLogger("copenJS");
 var server = net.createServer()
+
+let ws
+
+if (config.UI.enable) {
+   startProcess("sudo node server.mjs", process.cwd().split("/src")[0] + "/webUI").then((process) => {
+     process.stdout.on("data", (data) => {
+         logger.info(data)
+         if (data === "Websocket listening on port " + config.UI.websocket) {
+                ws = new WebSocket("ws://localhost:" + config.UI.websocket)
+         }
+     }) 
+   })
+}
 
 const servport = config.scanner['tcp-servport']
 let masscanStatus = false
