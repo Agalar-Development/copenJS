@@ -17,17 +17,6 @@ var server = net.createServer()
 
 let ws
 
-if (config.UI.enable) {
-   startProcess("sudo node server.mjs", process.cwd().split("/src")[0] + "/webUI").then((process) => {
-     process.stdout.on("data", (data) => {
-         logger.info(data)
-         if (data === "Websocket listening on port " + config.UI.websocket) {
-                ws = new WebSocket("ws://localhost:" + config.UI.websocket)
-         }
-     }) 
-   })
-}
-
 const servport = config.scanner['tcp-servport']
 let masscanStatus = false
 
@@ -54,6 +43,7 @@ const startMasscan = () => startProcess(`masscan 0.0.0.0/0 -p${config.masscan.po
     process.stderr.on("data", (data) => {
         // idk why but masscan stdios are stderr
         logger.info(data)
+        ws.send(JSON.stringify({ mode: "Masscan", data: data}))
     })
     process.on("exit", (code, signal) => {
         logger.warn("Process is closed with code: " + code)
@@ -178,6 +168,11 @@ const serverScanner = async () => {
                 assignedList.forEach(async (data, n) => {
                     defaultText += "\n   Process processNumber: Current IP: currentIP Last Response: lastResponseText Status: statusText Total Assigned: assignedInt Total Finds: findInt Restarts: restartInt Responseless Pings: pingInt ".replace("processNumber", n.toString()).replace("findInt", data[1].finds).replace("assignedInt", data[1].assigned).replace("currentIP", data[1].currentIp).replace("lastResponseText", `${getColor(data[1].lastresponsetext, "ms")}${data[1].lastresponsetext}ms\x1b[0m`).replace("statusText", `${getColor({ data: data[1].assigned, extra: data[1].currentPings }, "status")}\x1b[0m`).replace("restartInt", data[1].restarts).replace("pingInt", data[1].currentPings)
                 })
+                let temp
+                assignedList.forEach((data) => {
+                    temp.push(data[1])
+                })
+                ws.send(JSON.stringify({ mode: "copenJS", main: currData, subproc: temp}))
                 text.text = defaultText
                 currData.totalLast = currData.total
             }, 500)
@@ -296,4 +291,19 @@ const Main = async () => {
     }
 }
 
-Main()
+if (config.UI.enable) {
+    var i = 0
+    startProcess("sudo node server.mjs", process.cwd().split("/src")[0] + "/webUI").then((process) => {
+        process.stdout.on("data", (data) => {
+            logger.info(data)
+            if (i == 0) {
+                i++
+                ws = new WebSocket("ws://localhost:" + config.UI.websocket)
+                ws.onopen = () => {
+                    ws.send("server")
+                    Main()
+                }
+            }
+        })
+    })
+} else Main()

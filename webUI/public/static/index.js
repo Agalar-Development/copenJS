@@ -2,7 +2,7 @@ let socket
 
 $.ajax({
     url: "/api/socket", success: function (result) {
-        socket = new WebSocket("ws://localhost:" + JSON.parse(atob(result)).wsp);
+        socket = new WebSocket(`ws://${document.location.host}:${JSON.parse(atob(result)).wsp}`);
         socket.onopen = function (e) {
             socket.send("client")
             test()
