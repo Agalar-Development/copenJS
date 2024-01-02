@@ -8,7 +8,7 @@
     "scanner": {
         "mode": "default",
 		"tcp-servport": 9532,
-        "logger": "debug",
+        "logger": "info",
         "parserMaxRam": 5,
         "processMaxBuffer": 1,
         "webhook": "",
@@ -20,5 +20,12 @@
     "timings" : {
        "maxresponse": 110000,
        "avgresponse": 2000
-    }
+    },
+    "UI": {
+        "enable": true,
+        "web": {
+            "listen": 80
+        },
+        "websocket": 9534
+    } 
 }
