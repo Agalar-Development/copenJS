@@ -8,6 +8,27 @@ body {
     font-size: 22px;
     text-align: center;
 }
+
 p {
    margin: 5px 0px 0px 0px;
 }
+
+@media only screen and (max-width: 1014px) {
+    .dataInfo {
+        display: none;
+    }
+}
+
+.rotatable {
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .rotated90 { 
+    transform:rotate(180deg); 
+    -webkit-transform:rotate(180deg); 
+    -moz-transform:rotate(180deg); 
+    -o-transform:rotate(180deg); 
+  }

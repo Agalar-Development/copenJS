@@ -1,6 +1,7 @@
 import express from "express"
 import config from "../src/config.json" assert { type: "json" }
 import { WebSocketServer, WebSocket } from 'ws';
+import motdParser from "@sfirew/minecraft-motd-parser"
 
 var wss = new WebSocketServer({ port: config.UI.websocket })
 
@@ -53,6 +54,10 @@ app.get("/", (req, res) => {
 
 app.get("/api/socket", (req, res) => {
     res.status(200).send(btoa(JSON.stringify({ wsp: config.UI.websocket })))
+})
+
+app.get("/api/database/fetch", (req, res) => {
+    res.status(200).send("null")
 })
 
 app.all("*", (req, res) => {
