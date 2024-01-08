@@ -65,23 +65,23 @@ const createContent = (data) => {
     base.style = "text-align: center; display: flex"
     base.id = `datacontent${content}`
     var imageNode = document.createElement("img")
-    imageNode.src = (data.favicon === null) ? "https://mcutils.com/display/packpng.svg" : data.favicon
+    imageNode.src = (data.favicon === null) ? "./copenJS.png" : data.favicon
     imageNode.style = "user-select: none;border-radius: 50%; margin: 12px 12px 12px 12px; height: 96px; width: 96px;"
     base.appendChild(imageNode)
     var textNode = document.createElement("div")
-    textNode.style = "font-family: 'Inter'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; font-size: 20px"
-    textNode.innerHTML += `<span style="color:#FFAA00;">▶ </span><span style="color:#FFAA00;">CraftRise </span><span style="color:#AAAAAA;">∙ </span><span style="color:#55FF55;">Türkiye'nin sunucusu </span><span style="color:#AAAAAA;">∙ </span><span style="color:#FF5555;">1.8/1.12 </span><span style="color:#AA0000;">◀<br> </span><span style="color:#FFFF55;font-weight: bold;">https://www.craftrise.com.tr/oyna</span><span style="color:#FFFF55;font-weight: bold;"></span>`
+    textNode.style = "font-family: 'Inter'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; font-size: 20px; color: #FFFFFF;"
+    textNode.innerHTML += data.motdHTML
     base.appendChild(textNode)
     var buttonNode = document.createElement("img")
     buttonNode.className = "rotatable"
-    buttonNode.style = "user-select: none; position: sticky; right: 50%; margin-left: auto; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px"
+    buttonNode.style = "user-select: none; position: sticky; right: 50%; margin-left: 50%; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px; position: absolute; margin-top: 4.5%"
     buttonNode.src = "https://cdn.discordapp.com/attachments/1014616964964036670/1193331215592329226/icons8-down-4801.png"
     buttonNode.setAttribute("onclick", `rotate(this)`)
     base.appendChild(buttonNode)
     var infoNode = document.createElement("div")
     infoNode.style = "font-family: 'Inter'; text-align: right; margin-top: auto; margin-bottom: auto; margin-left: auto; font-size: 20px; margin-right: 12px;"
     infoNode.className = "dataInfo"
-    infoNode.innerHTML += `<span style="color: #FFFFFF"> IP: ${data.ip}</span>
+    infoNode.innerHTML += `<span style="color: #FFFFFF" onclick="copyClipboard(this)")"> IP: ${data.ip}</span>
      <span style="color: #FFFFFF" title="${data.version}"> Version: ${data.protocolversion}</span>
      <span style="color: #FFFFFF"> Latency: ${data.latency}ms</span>
      <br>
@@ -91,3 +91,28 @@ const createContent = (data) => {
     document.getElementById("database").appendChild(base)
 }
 
+const fetchDatabase = () => {
+    $.ajax({
+        type: "POST",
+        url: "/api/database/fetch", success: function (result) {
+            result.data.forEach((data) => {
+                createContent(data)
+            })
+        },
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ skip: content }),
+        processData: false
+    })
+}
+
+const copyClipboard = (element) => {
+    if (element.innerText === "Copied!") return 0
+    navigator.clipboard.writeText(`${element.innerText.replace("IP: ", "")}`)
+    var temp = element.innerText
+    element.innerText = "Copied!"
+    setTimeout(() => {
+        element.innerText = temp
+    }, 1000)
+}
+
+fetchDatabase()

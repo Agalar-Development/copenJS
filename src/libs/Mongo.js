@@ -6,22 +6,24 @@ const config = require('../config.json');
 const client = new MongoClient(config.scanner.mongolink)
 const db = client.db("Scanner")
 
-function Connect() {
+const Connect = () => new Promise((resolve, reject) => {
     try {
         client.connect()
         System.Log("green", "Successfully connected to MongoDB via Library.");
+        resolve()
     } catch (err) {
         System.Log("red", "Failed to connect to MongoDB.");
         console.log(err)
+        reject()
     }
-}
+})
 async function MongoLogger(data, collection) {
     var cbase = db.collection(collection)
     var result = await cbase.find({
         IP: data.IP,
     }).toArray().then(result => result[0])
     if (result == undefined) {
-       // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
+        // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
         MongoDBWrite(data, collection)
     } else {
         //System.Log("yellow", "Server data found in MongoDB. Server IP: " + result.IP);
@@ -46,7 +48,19 @@ async function MongoFind(data, collection) {
     return await cbase.find(data).toArray().then(result => result[0])
 }
 
+async function fetchCustom(data, collection, skip) {
+    var cbase = db.collection(collection)
+    return await cbase.find(data).skip(skip).limit(20).toArray().then(result => result)
+}
+
+async function fetchRandom(collection) {
+    var cbase = db.collection(collection)
+    return cbase.aggregate([{ $sample: { size: 20 } }]).toArray()
+}
+
+module.exports.fetchRandom = fetchRandom;
 module.exports.MongoFind = MongoFind
 module.exports.MongoLogger = MongoLogger;
 module.exports.MongoDBWrite = MongoDBWrite;
 module.exports.Connect = Connect;
+module.exports.fetchCustom = fetchCustom;
