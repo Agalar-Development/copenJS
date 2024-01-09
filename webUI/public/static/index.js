@@ -80,12 +80,11 @@ const createContent = (data) => {
     base.appendChild(buttonNode)
     var infoNode = document.createElement("div")
     infoNode.style = "font-family: 'Inter'; text-align: right; margin-top: auto; margin-bottom: auto; margin-left: auto; font-size: 20px; margin-right: 12px;"
-    infoNode.className = "dataInfo"
     infoNode.innerHTML += `<span style="color: #FFFFFF" onclick="copyClipboard(this)")"> IP: ${data.ip}</span>
-     <span style="color: #FFFFFF" title="${data.version}"> Version: ${data.protocolversion}</span>
-     <span style="color: #FFFFFF"> Latency: ${data.latency}ms</span>
+     <span class="dataInfo" style="color: #FFFFFF" title="${data.version}"> Version: ${data.protocolversion}</span>
+     <span class="dataInfo" style="color: #FFFFFF"> Latency: ${data.latency}ms</span>
      <br>
-     <span style="color: #FFFFFF"> Players: ${data.currentplayers}/${data.maxplayers}</span>`
+     <span class="dataInfo" style="color: #FFFFFF"> Players: ${data.currentplayers}/${data.maxplayers}</span>`
     base.appendChild(infoNode)
     content++
     document.getElementById("database").appendChild(base)
