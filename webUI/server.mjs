@@ -7,7 +7,6 @@ import database from "../src/libs/Mongo.js"
 var wss = new WebSocketServer({ port: config.UI.websocket })
 
 database.Connect().then(() => {
-    console.log("Connected to MongoDB")
     wss.on("listening", () => {
         console.log("Websocket listening on port " + config.UI.websocket)
         app.listen(config.UI.web.listen, () => {
@@ -68,6 +67,10 @@ app.post("/api/database/fetch", async (req, res) => {
     }).finally(() => {
         res.status(200).jsonp({data: temp})
     })
+})
+
+app.get("/api/database/stats", async (req, res) =>{
+    res.status(200).jsonp(await database.stats())
 })
 
 app.all("*", (req, res) => {

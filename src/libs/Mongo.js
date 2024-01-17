@@ -58,6 +58,9 @@ async function fetchRandom(collection) {
     return cbase.aggregate([{ $sample: { size: 20 } }]).toArray()
 }
 
+const stats = () => db.stats()
+
+module.exports.stats = stats;
 module.exports.fetchRandom = fetchRandom;
 module.exports.MongoFind = MongoFind
 module.exports.MongoLogger = MongoLogger;

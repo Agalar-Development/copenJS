@@ -37,6 +37,7 @@ p {
     position: absolute;
     background-color: #000000;
     border: solid #000000 2px;
+    z-index: 1;
 }
 
 .btn:hover {

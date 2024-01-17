@@ -62,7 +62,7 @@ const rotate = (data) => data.classList.toggle("rotated90")
 
 const createContent = (data) => {
     var base = document.createElement("div")
-    base.style = "text-align: center; display: flex"
+    base.style = "text-align: center; display: flex; position: relative"
     base.id = `datacontent${content}`
     var imageNode = document.createElement("img")
     imageNode.src = (data.favicon === null) ? "./copenJS.png" : data.favicon
@@ -74,7 +74,7 @@ const createContent = (data) => {
     base.appendChild(textNode)
     var buttonNode = document.createElement("img")
     buttonNode.className = "rotatable"
-    buttonNode.style = "user-select: none; position: sticky; right: 50%; margin-left: 50%; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px; position: absolute; margin-top: 4.5%"
+    buttonNode.style = "user-select: none; position: absolute; right: 50%; margin-left: 50%; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px; bottom: 0px"
     buttonNode.src = "https://cdn.discordapp.com/attachments/1014616964964036670/1193331215592329226/icons8-down-4801.png"
     buttonNode.setAttribute("onclick", `rotate(this)`)
     base.appendChild(buttonNode)

@@ -12,7 +12,22 @@
         "parserMaxRam": 5,
         "processMaxBuffer": 1,
         "webhook": "",
-        "mongolink": ""
+        "mongolink": "",
+        "cloudflare": {
+            "R2": {
+                "endpoint": "",
+                "cf-api-key": "",
+                "access-id": "",
+                "secret-access": ""
+            }
+        },
+        "twitch": {
+            "endpoint": "https://api.twitch.tv/helix/",
+            "app": {
+                "client-id": "",
+                "client-secret": ""
+            }
+        }
     },
     "chart": {
         "port": 9533
