@@ -173,7 +173,7 @@ const serverScanner = async () => {
         }
         logger.info("Parser will be started in 3 seconds...")
         setTimeout(() => {
-            startProcess(`java -Xmx${config.scanner.parserMaxRam}G -jar ` + process.cwd() + '/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar')
+            startProcess(`java -Xmx${config.scanner.parserMaxRam}G -jar ` + process.cwd() + '/libs/copenJSParser-1.3-DEV.jar')
             setInterval(async () => {
                 assignedList.sort((a, b) => { return a[0] - b[0] })
                 let defaultText = `Main Process: \n   Current IP/s: ${(currData.total - currData.totalLast) * 2} IP/s \n   Total Assigned: ${currData.assigned} \n   Total TCP Restarts: ${currData.tcpRestarts} \n   Total Finds & Total Try: ${currData.finds} & ${currData.total} \n   Current Rate: ${((currData.finds / currData.total) * 100).toFixed(2)}% \n   Total Sub-Processes: ${currData.subprocesses} \n   Current IP: ${currData.lastIp} \nSub-Processes: `
@@ -225,7 +225,7 @@ const serverScanner = async () => {
     server.on("connection", function (socket) {
         socket.on('error', function (err) {
             logger.warn("The client lost the connection " + err)
-            startProcess(`java -Xmx${config.scanner.parserMaxRam}G -jar ` + process.cwd() + `/libs/copenJSParser-1.0-SNAPSHOT-5ms.jar "${process.cwd().split("src") + "scan.json"}" 0 "` + currData.lastIp + '"')
+            startProcess(`java -Xmx${config.scanner.parserMaxRam}G -jar ` + process.cwd() + `/libs/copenJSParser-1.3-DEV.jar "${process.cwd().split("src") + "scan.json"}" 0 "` + currData.lastIp + '"')
             currData.tcpRestarts++
         })
         socket.on('end', function () {
@@ -233,7 +233,9 @@ const serverScanner = async () => {
             if (!crashedList.length == 0) {
                 logger.info("There is a list of ips that sent to the processes which is crashed. Re-running " + currData.crashedTotal + " ips.")
                 currData.crashedTotal = 0
-                cprocess.fork("./libs/crash.js").send({ list: crashedList })
+                var crashProc = cprocess.fork("./libs/crash.js")
+                crashProc.send({ list: crashedList })
+                crashProc.on("exit", () => {})
                 crashedList = []
             }
         })

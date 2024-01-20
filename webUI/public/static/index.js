@@ -69,7 +69,7 @@ const createContent = (data) => {
     imageNode.style = "user-select: none;border-radius: 50%; margin: 12px 12px 12px 12px; height: 96px; width: 96px;"
     base.appendChild(imageNode)
     var textNode = document.createElement("div")
-    textNode.style = "font-family: 'Inter'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; font-size: 20px; color: #FFFFFF;"
+    textNode.style = "font-family: 'Noto Sans'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; font-size: 20px; color: #FFFFFF;"
     textNode.innerHTML += data.motdHTML
     base.appendChild(textNode)
     var buttonNode = document.createElement("img")

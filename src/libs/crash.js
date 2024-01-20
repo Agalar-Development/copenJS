@@ -9,7 +9,7 @@ async function sleep(milliseconds) {
 }
 
 const net = require('net');
-let globalList;
+let globalList = []
 
 var client = net.createConnection({ port: config["tcp-servport"] }, async function () {
     console.log('Connected');
