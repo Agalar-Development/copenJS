@@ -36,6 +36,7 @@ var colors = ["\x1b[31m", "\x1b[32m", "\x1b[33m"]
 let processList = []
 let assignedList = []
 let crashedList = []
+let compromisedList = []
 var text = ora()
 text.spinner = spinners.dots13
 
@@ -43,7 +44,7 @@ const startMasscan = () => startProcess(`masscan 0.0.0.0/0 -p${config.masscan.po
     process.stderr.on("data", (data) => {
         // idk why but masscan stdios are stderr
         logger.info(data)
-        ws.send(JSON.stringify({ mode: "Masscan", data: data}))
+        sendDatatoUI(JSON.stringify({ mode: "Masscan", data: data }))
     })
     process.on("exit", (code, signal) => {
         logger.warn("Process is closed with code: " + code)
@@ -86,7 +87,13 @@ const getColor = (data, mode) => {
     }
 }
 
-const sendIPtoProcess = (ip) => {
+const sendDatatoUI = (data) => {
+    if (config.UI.enable) {
+        ws.send(data)
+    }
+}
+
+const sendIPtoProcess = (data) => {
     assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
     var x = 0
     while (assignedList[x][1]?.currentPings > 5 && x < os.availableParallelism()) {
@@ -96,14 +103,19 @@ const sendIPtoProcess = (ip) => {
         logger.fatal("All Processes are down!")
     }
     else {
-        processList[assignedList[x][0]][0].send({ mode: "search", ip: ip.toString(), time: Date.now() })
-        processList[assignedList[x][0]][1].push(ip.toString())
-        logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + ip.toString())
+        try {
+        processList[assignedList[x][0]][0].send({ mode: "search", ip: data.ip, ports: data.ports, time: Date.now() })
+        processList[assignedList[x][0]][1].push(data.ip)
+        logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + data.ip)
         assignedList[x][1].assigned++
         assignedList[x][1].total++
-        currData.lastIp = ip.toString()
+        currData.lastIp = data.ip
         currData.total++
         currData.assigned++
+        }
+        catch {
+            crashedList.push(data)
+        }
     }
 }
 
@@ -168,11 +180,11 @@ const serverScanner = async () => {
                 assignedList.forEach(async (data, n) => {
                     defaultText += "\n   Process processNumber: Current IP: currentIP Last Response: lastResponseText Status: statusText Total Assigned: assignedInt Total Finds: findInt Restarts: restartInt Responseless Pings: pingInt ".replace("processNumber", n.toString()).replace("findInt", data[1].finds).replace("assignedInt", data[1].assigned).replace("currentIP", data[1].currentIp).replace("lastResponseText", `${getColor(data[1].lastresponsetext, "ms")}${data[1].lastresponsetext}ms\x1b[0m`).replace("statusText", `${getColor({ data: data[1].assigned, extra: data[1].currentPings }, "status")}\x1b[0m`).replace("restartInt", data[1].restarts).replace("pingInt", data[1].currentPings)
                 })
-                let temp
+                let temp = []
                 assignedList.forEach((data) => {
                     temp.push(data[1])
                 })
-                ws.send(JSON.stringify({ mode: "copenJS", main: currData, subproc: temp}))
+                sendDatatoUI(JSON.stringify({ mode: "copenJS", main: currData, subproc: temp }))
                 text.text = defaultText
                 currData.totalLast = currData.total
             }, 500)
@@ -194,7 +206,7 @@ const serverScanner = async () => {
                 for (var i = 0; i < processList.length; i++) {
                     if (assignedList[i][1].currentPings > 5) {
                         logger.info("Restarting Thread: " + assignedList[i][0]),
-                        processList[assignedList[i][0]][0].kill("SIGINT")
+                            processList[assignedList[i][0]][0].kill("SIGINT")
                         processList[assignedList[i][0]][0] = cprocess.fork("./libs/thread.mjs", [assignedList[i][0]])
                         assignedList[i][1].restarts++
                         processList[assignedList[i][0]][1].shift()
@@ -226,7 +238,12 @@ const serverScanner = async () => {
             }
         })
         socket.on("data", async function (ip) {
-            sendIPtoProcess(ip)
+            if (ip.toString().split("}").length > 2 && ip.toString().split("}").length == 1) {
+                logger.debug("Received compromised data from client. Checking if its recoverable.")
+                compromisedList.push(ip.toString())
+            } else if (ip.toString().split("}").length == 2) {
+                sendIPtoProcess(JSON.parse(ip.toString()))
+            }
         })
     })
 }
@@ -300,7 +317,7 @@ if (config.UI.enable) {
                 i++
                 ws = new WebSocket("ws://localhost:" + config.UI.websocket)
                 ws.onopen = () => {
-                    ws.send("server")
+                    sendDatatoUI("server")
                     Main()
                 }
             }
