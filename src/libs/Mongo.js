@@ -20,7 +20,7 @@ const Connect = () => new Promise((resolve, reject) => {
 async function MongoLogger(data, collection) {
     var cbase = db.collection(collection)
     var result = await cbase.find({
-        IP: data.IP,
+        ip: data.ip,
     }).toArray().then(result => result[0])
     if (result == undefined) {
         // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");

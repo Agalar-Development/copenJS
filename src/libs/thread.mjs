@@ -24,7 +24,7 @@ process.on("message", (data) => {
                             if (data.players.online > 0) await webhook(ip.toString() + `:${port}`, data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://media.minecraftforum.net/attachments/300/619/636977108000120237.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI?.countryCode ?? null)
                             Database.MongoLogger({
                                 ip: ip.toString(),
-                                ports: ports,
+                                ports: port,
                                 version: data.version.name,
                                 protocol: data.version.protocol,
                                 protocolVersion: await protocol.ProtocolTOVersion(data.version.protocol),
