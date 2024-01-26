@@ -6,6 +6,8 @@ import database from "../src/libs/Mongo.js"
 
 var wss = new WebSocketServer({ port: config.UI.websocket })
 
+const readOnly = config.scanner.mongo.endpoint.replace("username", config.scanner.mongo.admin.username).replace("password", config.scanner.mongo.admin.password)
+
 database.Connect().then(() => {
     wss.on("listening", () => {
         console.log("Websocket listening on port " + config.UI.websocket)
@@ -71,6 +73,20 @@ app.post("/api/database/fetch", async (req, res) => {
 
 app.get("/api/database/stats", async (req, res) =>{
     res.status(200).jsonp(await database.stats())
+})
+
+app.get("/api/database/info", async (req, res) => {
+    try {
+        var userAgent = (req.headers["user-agent"]).split("/")
+        if (userAgent[0] === "copenJSAgent" && await database.checkUserAgent(userAgent[1])) {
+            res.status(200).send((config.scanner.mongo.srv === true) ? readOnly.replace("mongodb", "mongodb+srv") : readOnly)
+        } else {
+            res.status(404).send("404 Not Found")
+        }
+    }
+    catch (err) {
+        res.status(404).send("404 Not Found")
+    }
 })
 
 app.all("*", (req, res) => {

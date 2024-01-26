@@ -7,12 +7,23 @@
     },
     "scanner": {
         "mode": "default",
-		"tcp-servport": 9532,
+        "tcp-servport": 9532,
         "logger": "info",
         "parserMaxRam": 5,
         "processMaxBuffer": 1,
         "webhook": "",
-        "mongolink": "",
+        "mongo": {
+            "endpoint": "mongodb://",
+            "srv": true,
+            "admin": {
+                "username": "",
+                "password": ""
+            },
+            "read-only": {
+                "username": "",
+                "password": ""
+            }
+        },
         "cloudflare": {
             "R2": {
                 "endpoint": "",
@@ -32,9 +43,9 @@
     "chart": {
         "port": 9533
     },
-    "timings" : {
-       "maxresponse": 110000,
-       "avgresponse": 2000
+    "timings": {
+        "maxresponse": 110000,
+        "avgresponse": 2000
     },
     "UI": {
         "enable": true,
@@ -42,5 +53,5 @@
             "listen": 80
         },
         "websocket": 9534
-    } 
+    }
 }

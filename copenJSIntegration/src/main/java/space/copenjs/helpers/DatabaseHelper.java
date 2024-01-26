@@ -14,7 +14,7 @@ public class DatabaseHelper extends copenJS {
 
     @SuppressWarnings("DataFlowIssue")
     public static void connectDatabase() {
-        try (MongoClient mongoClient = MongoClients.create(NetworkHelper.fetchDatabase("http://localhost/api/database/info"))) {
+        try (MongoClient mongoClient = MongoClients.create(NetworkHelper.fetchDatabase("https://ui.copenjs.space/api/database/info"))) {
             database = mongoClient.getDatabase("Scanner");
             mongoCollection = database.getCollection("Servers");
             isConnected = true;

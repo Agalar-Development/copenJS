@@ -3,7 +3,8 @@ const {
 } = require('mongodb');
 const System = require('./Log.js');
 const config = require('../config.json');
-const client = new MongoClient(config.scanner.mongolink)
+var connectionString = config.scanner.mongo.endpoint.replace("username", config.scanner.mongo.admin.username).replace("password", config.scanner.mongo.admin.password)
+const client = new MongoClient((config.scanner.mongo.srv === true) ? connectionString.replace("mongodb", "mongodb+srv") : connectionString)
 const db = client.db("Scanner")
 
 const Connect = () => new Promise((resolve, reject) => {
@@ -53,6 +54,11 @@ async function fetchCustom(data, collection, skip) {
     return await cbase.find(data).skip(skip).limit(20).toArray().then(result => result)
 }
 
+async function checkUserAgent(version) {
+    var cbase = db.collection("AllowedAgents")
+    return await cbase.find({ agent: `${version.toString()}` }).toArray().then(result => result[0]?.agent === version)
+}
+
 async function fetchRandom(collection) {
     var cbase = db.collection(collection)
     return cbase.aggregate([{ $sample: { size: 20 } }]).toArray()
@@ -60,10 +66,13 @@ async function fetchRandom(collection) {
 
 const stats = () => db.stats()
 
-module.exports.stats = stats;
-module.exports.fetchRandom = fetchRandom;
-module.exports.MongoFind = MongoFind
-module.exports.MongoLogger = MongoLogger;
-module.exports.MongoDBWrite = MongoDBWrite;
-module.exports.Connect = Connect;
-module.exports.fetchCustom = fetchCustom;
+module.exports = {
+    stats,
+    fetchRandom,
+    MongoFind,
+    MongoDBWrite, 
+    MongoLogger, 
+    Connect, 
+    fetchCustom, 
+    checkUserAgent
+}
