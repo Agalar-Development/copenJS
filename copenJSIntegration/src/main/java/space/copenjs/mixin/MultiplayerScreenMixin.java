@@ -6,8 +6,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import space.copenjs.helpers.DatabaseHelper;
-import space.copenjs.copenJS;
+import space.copenjs.gui.copenJSServerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,12 +17,7 @@ public abstract class MultiplayerScreenMixin extends Screen {
 		super(title);
 	}
 	public ButtonWidget copenJSButton = new ButtonWidget.Builder(Text.literal("copenJS"), button -> {
-		if (DatabaseHelper.isConnected) {
-			copenJS.LOGGER.info("Successfully connected to the database.");
-		}
-		else {
-			copenJS.LOGGER.info("There is a error happened while connecting to the database. Please provide the log file to the developers.");
-		}
+		client.setScreen(new copenJSServerList(client.currentScreen));
 	})
 			.position(10, 7)
 			.size(60, 20)

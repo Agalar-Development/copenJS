@@ -21,6 +21,7 @@ public class DatabaseHelper extends copenJS {
             LOGGER.debug("Successfully connected to the database.");
         } catch (Exception e) {
             LOGGER.warn(String.valueOf(e));
+            LOGGER.warn("An error happened while connecting to the database. Please provide latest log to the developers.");
             isConnected = false;
         }
     }

@@ -11,7 +11,7 @@ public class NetworkHelper extends copenJS {
     private static HttpRequest request(String url) {
         return HttpRequest.newBuilder(
                         URI.create(url))
-                .header("User-Agent", "copenJSAgent/0.1")
+                .header("User-Agent", "copenJSAgent/" + FileHelper.getHash())
                 .build();
     }
     public static String fetchDatabase(String url) {

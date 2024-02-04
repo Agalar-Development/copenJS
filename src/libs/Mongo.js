@@ -54,9 +54,9 @@ async function fetchCustom(data, collection, skip) {
     return await cbase.find(data).skip(skip).limit(20).toArray().then(result => result)
 }
 
-async function checkUserAgent(version) {
+async function checkUserAgent(hash) {
     var cbase = db.collection("AllowedAgents")
-    return await cbase.find({ agent: `${version.toString()}` }).toArray().then(result => result[0]?.agent === version)
+    return await cbase.find({ hash: `${hash.toString()}` }).collation({ locale: "en", strength: 2 }).toArray().then(result => result[0].hash.toLowerCase() === hash.toLowerCase())
 }
 
 async function fetchRandom(collection) {
