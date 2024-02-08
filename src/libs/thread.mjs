@@ -3,7 +3,7 @@ import webhook from './webhookHelper.mjs'
 import Database from './Mongo.js'
 import axios from "axios"
 import crypto from "node:crypto"
-import cdn from "../libs/cloudflare.js"
+import cdn from "./cloudflare.js"
 
 const currentThread = process.argv[2]
 
@@ -22,7 +22,7 @@ process.on("message", (data) => {
                     protocol.GetServerData(ip.toString(), port).then(async (data) => {
                         var hash = crypto.createHash("md5").update(data.favicon).digest("hex")
                         var ipAPI = await axios.get(`http://ip-api.com/json/${ip.toString()}?fields=message,country,countryCode,region,city,district,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting`).then((response) => response.data).catch((err) => "IP-API Error")
-                        cf.uploadFile(new Buffer.from(data.replace(/^data:image\/\w+;base64,/, ""), 'base64'), hash + ".png")
+                        cdn.uploadFile(new Buffer.from(data.replace(/^data:image\/\w+;base64,/, ""), 'base64'), hash + ".png")
                         try {
                             process.send({ ip: ip.toString(), status: "success", thread: currentThread, time: time })
                             if (data.players.online > 0) await webhook(ip.toString() + `:${port}`, data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, `https://cdn.copenjs.space/${hash}.png`, new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI?.countryCode ?? null)
