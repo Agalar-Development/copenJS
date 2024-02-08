@@ -64,7 +64,7 @@ app.post("/api/database/fetch", async (req, res) => {
     var temp = []
     await database.fetchRandom("Servers").then(async (resp) => {
         resp.forEach((data) => {
-            temp.push({ favicon: data.favicon, motdHTML: (data.motd == null) ? null : motdParser.JSONToHTML(data.motd), ip: data.ip, version: data.version, protocolversion: data.protocolVersion, latency: (data.latency == null) ? 0 : data.latency, currentplayers: data.onlinePlayer, maxplayers: data.maxPlayer })
+            temp.push({ favicon: data.faviconBase64, motdHTML: (data.motd == null) ? null : motdParser.JSONToHTML(data.motd), ip: data.ip, version: data.version, protocolversion: data.protocolVersion, latency: (data.latency == null) ? 0 : data.latency, currentplayers: data.onlinePlayer, maxplayers: data.maxPlayer })
         })
     }).finally(() => {
         res.status(200).jsonp({data: temp})
