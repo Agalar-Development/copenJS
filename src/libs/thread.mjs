@@ -20,12 +20,11 @@ process.on("message", (data) => {
             ports.forEach((port) => {
                 try {
                     protocol.GetServerData(ip.toString(), port).then(async (data) => {
-                        var hash = crypto.createHash("md5").update(data.favicon).digest("hex")
                         var ipAPI = await axios.get(`http://ip-api.com/json/${ip.toString()}?fields=message,country,countryCode,region,city,district,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting`).then((response) => response.data).catch((err) => "IP-API Error")
                         cdn.uploadFile(new Buffer.from(data.replace(/^data:image\/\w+;base64,/, ""), 'base64'), hash + ".png")
                         try {
                             process.send({ ip: ip.toString(), status: "success", thread: currentThread, time: time })
-                            if (data.players.online > 0) await webhook(ip.toString() + `:${port}`, data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, `https://cdn.copenjs.space/${hash}.png`, new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI?.countryCode ?? null)
+                            if (data.players.online > 0) await webhook(ip.toString() + `:${port}`, data.version.name, await protocol.ProtocolTOVersion(data.version.protocol), "Full motd data will be in released with database. ", data.latency, "https://media.minecraftforum.net/attachments/300/619/636977108000120237.png", new Date().toISOString(), data.players.max, data.players.online, ((data.modinfo?.type ?? false) === "FML") ? true : false, ipAPI?.countryCode ?? null)
                             Database.MongoLogger({
                                 ip: ip.toString(),
                                 ports: port,
@@ -34,16 +33,14 @@ process.on("message", (data) => {
                                 protocolVersion: await protocol.ProtocolTOVersion(data.version.protocol),
                                 motd: data.description,
                                 latency: data.latency,
-                                faviconBase64: data.favicon,
-                                favicon: `https://cdn.copenjs.space/${hash}.png`,
+                                favicon: data.favicon,
                                 timestamp: new Date().toISOString(),
                                 maxPlayer: data.players.max,
                                 onlinePlayer: data.players.online,
                                 players: data.players.sample,
                                 modinfo: data.modinfo,
                                 ipAPI: ipAPI,
-                                hash: hash
-                            }, "Servers")
+                            }, "Servers2")
                         }
                         catch (err) {
                             //    console.log(err)
