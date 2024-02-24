@@ -58,26 +58,42 @@ const receive = () => {
 
 const processShow = () => $("#subprocess-div").fadeToggle(200)
 
-const rotate = (data) => data.classList.toggle("rotated90")
+const rotate = (data) => {
+    data.classList.toggle("rotated90")
+    var id = data.parentElement.id.split("datacontent")[1]
+    if (data.classList.length === 2) {
+        $("#extraInfo" + id).animate({
+            "margin-top": "10%",
+        }, "fast")
+    }
+    else {
+        $("#extraInfo" + id).animate({
+            "margin-top": "0%",
+        }, "fast")
+    }
+}
 
 const createContent = (data) => {
     var base = document.createElement("div")
-    base.style = "text-align: center; display: flex; position: relative"
-    base.id = `datacontent${content}`
+    var basic = document.createElement("div")
+    basic.style = "text-align: center; position: static; display: flex;"
+    base.style = "text-align: center; display: contents; position: relative"
+    basic.id = `datacontent${content}`
+    basic.classList.add("datacontent")
     var imageNode = document.createElement("img")
     imageNode.src = (data.favicon === null) ? "./copenJS.png" : data.favicon
     imageNode.style = "user-select: none;border-radius: 50%; margin: 12px 12px 12px 12px; height: 96px; width: 96px;"
-    base.appendChild(imageNode)
+    basic.appendChild(imageNode)
     var textNode = document.createElement("div")
-    textNode.style = "font-family: 'Noto Sans'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; font-size: 20px; color: #FFFFFF;"
+    textNode.style = "font-family: 'Noto Sans'; text-align: left; margin-top: auto; margin-bottom: auto; margin-left: 8px; margin-right: auto; font-size: 20px; color: #FFFFFF;"
     textNode.innerHTML += data.motdHTML
-    base.appendChild(textNode)
+    basic.appendChild(textNode)
     var buttonNode = document.createElement("img")
     buttonNode.className = "rotatable"
-    buttonNode.style = "user-select: none; position: absolute; right: 50%; margin-left: 50%; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px; bottom: 0px"
-    buttonNode.src = "https://cdn.discordapp.com/attachments/1014616964964036670/1193331215592329226/icons8-down-4801.png"
+    buttonNode.style = "user-select: none; position: sticky; right: 50%; margin-left: 45%; margin-top: auto; margin-bottom: 3px; width: 32px; height: 32px; top: 90px"
+    buttonNode.src = "./icons8-down-480.png"
     buttonNode.setAttribute("onclick", `rotate(this)`)
-    base.appendChild(buttonNode)
+    basic.appendChild(buttonNode)
     var infoNode = document.createElement("div")
     infoNode.style = "font-family: 'Inter'; text-align: right; margin-top: auto; margin-bottom: auto; margin-left: auto; font-size: 20px; margin-right: 12px;"
     infoNode.innerHTML += `<span style="color: #FFFFFF" onclick="copyClipboard(this)")"> IP: ${data.ip}</span>
@@ -85,7 +101,13 @@ const createContent = (data) => {
      <span class="dataInfo" style="color: #FFFFFF"> Latency: ${data.latency}ms</span>
      <br>
      <span class="dataInfo" style="color: #FFFFFF"> Players: ${data.currentplayers}/${data.maxplayers}</span>`
-    base.appendChild(infoNode)
+    basic.appendChild(infoNode)
+    base.appendChild(basic)
+    base.innerHTML += "<br>"
+    var extraInfoNode = document.createElement("div")
+    extraInfoNode.style = "text-align: center; position: relative; display: flex;"
+    extraInfoNode.id = `extraInfo${content}`
+    base.appendChild(extraInfoNode)
     content++
     document.getElementById("database").appendChild(base)
 }

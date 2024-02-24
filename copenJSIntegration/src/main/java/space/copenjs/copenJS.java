@@ -15,7 +15,7 @@ public class copenJS implements ModInitializer {
 
 	@Override
 	public void onInitialize() {;
-        DatabaseHelper.connectDatabase();
+		DatabaseHelper.connectDatabase();
 		mc = MinecraftClient.getInstance();
 		LOGGER.info("copenJS is starting...");
 	}

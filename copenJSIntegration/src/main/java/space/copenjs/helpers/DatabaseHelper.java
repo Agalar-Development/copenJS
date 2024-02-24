@@ -1,28 +1,26 @@
 package space.copenjs.helpers;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Aggregates;
 import org.bson.Document;
 import space.copenjs.copenJS;
+
+import java.util.List;
 
 public class DatabaseHelper extends copenJS {
     private static MongoDatabase database;
     public static MongoCollection<Document> mongoCollection;
-    public static boolean isConnected;
+    public static boolean isConnected = false;
 
     @SuppressWarnings("DataFlowIssue")
     public static void connectDatabase() {
-        try (MongoClient mongoClient = MongoClients.create(NetworkHelper.fetchDatabase("https://ui.copenjs.space/api/database/info"))) {
+        MongoClient mongoClient = MongoClients.create("mongodb+srv://" + NetworkHelper.fetchDatabase("http://ui.copenjs.space/api/database/info") + "@ui.copenjs.space/?tls=false");
             database = mongoClient.getDatabase("Scanner");
             mongoCollection = database.getCollection("Servers");
             isConnected = true;
             LOGGER.debug("Successfully connected to the database.");
-        } catch (Exception e) {
-            LOGGER.warn(String.valueOf(e));
-            LOGGER.warn("An error happened while connecting to the database. Please provide latest log to the developers.");
-            isConnected = false;
-        }
+    }
+    public static AggregateIterable<Document> fetchServers() {
+        return mongoCollection.aggregate(List.of(Aggregates.sample(30)));
     }
 }

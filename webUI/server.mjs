@@ -6,8 +6,6 @@ import database from "../src/libs/Mongo.js"
 
 var wss = new WebSocketServer({ port: config.UI.websocket })
 
-const readOnly = config.scanner.mongo.endpoint.replace("username", config.scanner.mongo.admin.username).replace("password", config.scanner.mongo.admin.password)
-
 database.Connect().then(() => {
     wss.on("listening", () => {
         console.log("Websocket listening on port " + config.UI.websocket)
@@ -64,7 +62,7 @@ app.post("/api/database/fetch", async (req, res) => {
     var temp = []
     await database.fetchRandom("Servers").then(async (resp) => {
         resp.forEach((data) => {
-            temp.push({ favicon: data.favicon, motdHTML: (data.motd == null) ? null : motdParser.JSONToHTML(data.motd), ip: data.ip, version: data.version, protocolversion: data.protocolVersion, latency: (data.latency == null) ? 0 : data.latency, currentplayers: data.onlinePlayer, maxplayers: data.maxPlayer })
+            temp.push({ favicon: (!data.favicon?.includes("https")) ? data.favicon : data.faviconBase64, motdHTML: (data.motd == null) ? null : motdParser.JSONToHTML(data.motd), ip: data.ip, version: data.version, protocolversion: data.protocolVersion, latency: (data.latency == null) ? 0 : data.latency, currentplayers: data.onlinePlayer, maxplayers: data.maxPlayer })
         })
     }).finally(() => {
         res.status(200).jsonp({data: temp})
@@ -79,7 +77,7 @@ app.get("/api/database/info", async (req, res) => {
     try {
         var userAgent = (req.headers["user-agent"]).split("/")
         if (userAgent[0] === "copenJSAgent" && await database.checkUserAgent(userAgent[1])) {
-            res.status(200).send((config.scanner.mongo.srv === true) ? readOnly.replace("mongodb", "mongodb+srv") : readOnly)
+            res.status(200).send(`${config.scanner.mongo.admin.username}:${config.scanner.mongo.admin.password}`)
         } else {
             res.status(404).send("404 Not Found")
         }
