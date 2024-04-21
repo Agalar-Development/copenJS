@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.github.johnrengelman.shadow' version '8.1.1'
+	id "com.github.gmazzo.buildconfig" version "5.3.5"
 }
 
 version = project.mod_version
@@ -63,6 +64,19 @@ java {
 jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
+	}
+}
+
+buildConfig {
+	packageName("space.copenjs")
+	buildConfigField(String, "buildType", (System.getProperty("buildType") ?: "stable"))
+	buildConfigField("java.lang.Double", "MOD_VERSION", project.mod_version)
+	buildConfigField(String, "MOD_ID", project.archives_base_name)
+	if ((System.getProperty("buildType") ?: "stable") == "dev") {
+		buildConfigField(String, "bypassHash", System.getProperty("bypassHash") ?: null)
+	}
+	else {
+		buildConfigField(String, "bypassHash", null)
 	}
 }
 

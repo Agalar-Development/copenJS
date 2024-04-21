@@ -22,12 +22,14 @@ public class copenJSServerList extends Screen {
         super(Text.literal("copenJS Server List"));
         this.parent = parent;
     }
+    
     @Override
     protected void init() {
         copenJS.mc.getTextureManager().bindTexture(new Identifier("copenjs", "background.png"));
         copenJS.mc.getTextureManager().bindTexture(new Identifier("copenjs", "copenJS.png"));
         if (DatabaseHelper.isConnected) DatabaseHelper.fetchServers().forEach(server -> server.toJson());
     }
+
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
