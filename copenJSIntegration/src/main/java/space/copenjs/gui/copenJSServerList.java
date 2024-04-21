@@ -26,7 +26,7 @@ public class copenJSServerList extends Screen {
     @Override
     protected void init() {
         copenJS.mc.getTextureManager().bindTexture(new Identifier("copenjs", "background.png"));
-        copenJS.mc.getTextureManager().bindTexture(new Identifier("copenjs", "copenJS.png"));
+        copenJS.mc.getTextureManager().bindTexture(new Identifier("copenjs", "copenjs.png"));
         if (DatabaseHelper.isConnected) DatabaseHelper.fetchServers().forEach(server -> server.toJson());
     }
 
