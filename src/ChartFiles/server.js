@@ -2,8 +2,8 @@ var express = require('express')
 var config = require('../config.json')
 var app = express()
 
-app.listen(config.chart.port, () => {
-    console.log("Chart api started at port: " + config.chart.port)
+app.listen(config.Chart.port, () => {
+    console.log("Chart api started at port: " + config.Chart.port)
 })
 
 app.use(express.json())

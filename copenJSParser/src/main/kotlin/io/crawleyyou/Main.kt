@@ -33,7 +33,7 @@ class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
     init {
         when (mode) {
             0 -> {
-                newServerReader(fileLocation, extra)
+                ServerReader(fileLocation, extra)
             }
             1 -> {
                 GraphReader(fileLocation)
@@ -47,9 +47,6 @@ class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
     private fun ServerReader(args: String, startFrom: String?) {
         var count = 0
         var startStatus = false
-        if (startFrom == "null") {
-            startStatus = true
-        }
         try {
             val client = Socket("localhost", 9532)
             println("Reading file: $args " + LocalDateTime.now().toString())
@@ -77,51 +74,6 @@ class copenJSParser (fileLocation: String, mode: Int, extra: String? = "null") {
             println(e)
         }
     }
-
-    private fun newServerReader(args: String, startFrom: String?) {
-        var count = 0
-        var startStatus = false
-        if (startFrom == "null") {
-            startStatus = true
-        }
-        try {
-            val file = Files.newBufferedReader(Paths.get(args))
-            val client = Socket("localhost", 9532)
-            println("Reading file: $args " + LocalDateTime.now().toString())
-            while (file.readLine() != null) {
-                count++
-                var hitServerValue = Json.parseToJsonElement(file.readLine())
-                var ports = ArrayList<String>()
-                var ip = hitServerValue.jsonObject.get("ip").toString().replace("\"", "")
-
-                Json.parseToJsonElement(hitServerValue.jsonObject.get("ports").toString()).jsonArray.forEach {data ->
-                    ports.add(data.jsonObject.get("port").toString())
-                }
-
-                var data = buildJsonObject {
-                    put("ip", ip)
-                    putJsonArray("ports") {
-                        for (i in ports) add(i)
-                    }
-                }
-
-                if (startFrom == ip) {
-                    startStatus = true
-                }
-                else if (startStatus) {
-                    println("Current IP: $ip")
-                    client.outputStream.write(data.toString().toByteArray())
-                    TimeUnit.MILLISECONDS.sleep(1)
-                }
-            }
-            println("$count IP's processed. " + LocalDateTime.now().toString())
-            println("Finished reading file: $args " + LocalDateTime.now().toString())
-            client.close()
-        } catch (e: Exception) {
-            println(e)
-        }
-    }
-
     @Suppress("FunctionName")
     private fun GraphReader(args: String) {
         try {

@@ -3,28 +3,25 @@ const {
 } = require('mongodb');
 const System = require('./Log.js');
 const config = require('../config.json');
-var connectionString = config.scanner.mongo.endpoint.replace("username", config.scanner.mongo.admin.username).replace("password", config.scanner.mongo.admin.password)
-const client = new MongoClient((config.scanner.mongo.srv === true) ? connectionString.replace("mongodb", "mongodb+srv") : connectionString)
+const client = new MongoClient(config.Scanner.mongolink)
 const db = client.db("Scanner")
 
-const Connect = () => new Promise((resolve, reject) => {
+function Connect() {
     try {
         client.connect()
         System.Log("green", "Successfully connected to MongoDB via Library.");
-        resolve()
     } catch (err) {
         System.Log("red", "Failed to connect to MongoDB.");
         console.log(err)
-        reject()
     }
-})
+}
 async function MongoLogger(data, collection) {
     var cbase = db.collection(collection)
     var result = await cbase.find({
-        ip: data.ip,
+        IP: data.IP,
     }).toArray().then(result => result[0])
     if (result == undefined) {
-        // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
+       // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
         MongoDBWrite(data, collection)
     } else {
         //System.Log("yellow", "Server data found in MongoDB. Server IP: " + result.IP);
@@ -49,30 +46,7 @@ async function MongoFind(data, collection) {
     return await cbase.find(data).toArray().then(result => result[0])
 }
 
-async function fetchCustom(data, collection, skip) {
-    var cbase = db.collection(collection)
-    return await cbase.find(data).skip(skip).limit(20).toArray().then(result => result)
-}
-
-async function checkUserAgent(hash) {
-    var cbase = db.collection("AllowedAgents")
-    return await cbase.find({ hash: `${hash.toString()}` }).collation({ locale: "en", strength: 2 }).toArray().then(result => result[0].hash.toLowerCase() === hash.toLowerCase())
-}
-
-async function fetchRandom(collection) {
-    var cbase = db.collection(collection)
-    return cbase.aggregate([{ $sample: { size: 20 } }]).toArray()
-}
-
-const stats = () => db.stats()
-
-module.exports = {
-    stats,
-    fetchRandom,
-    MongoFind,
-    MongoDBWrite, 
-    MongoLogger, 
-    Connect, 
-    fetchCustom, 
-    checkUserAgent
-}
+module.exports.MongoFind = MongoFind
+module.exports.MongoLogger = MongoLogger;
+module.exports.MongoDBWrite = MongoDBWrite;
+module.exports.Connect = Connect;
