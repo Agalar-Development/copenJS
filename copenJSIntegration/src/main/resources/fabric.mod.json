@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "copenjs",
+	"version": "${version}",
+	"name": "copenJS",
+	"description": "copenJS Minecraft Integration Mod",
+	"authors": [
+		"CrawLeyYou"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/copenjs/copenJS.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"space.copenjs.copenJS"
+		],
+		"client": [
+			"space.copenjs.copenJSClient"
+		],
+		"fabric-datagen": [
+			"space.copenjs.copenJSDataGenerator"
+		]
+	},
+	"mixins": [
+		"copenjs.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.6",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
