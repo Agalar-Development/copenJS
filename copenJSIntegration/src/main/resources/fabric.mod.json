@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "MIT",
-	"icon": "assets/copenjs/copenJS.png",
+	"icon": "copenjs.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [

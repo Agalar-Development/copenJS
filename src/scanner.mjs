@@ -7,6 +7,8 @@ import ora from 'ora'
 import os from "os"
 import log4js from "log4js"
 import WebSocket from "ws"
+import database from "./libs/Mongo.js"
+import mmdb from "./libs/iplookup.mjs"
 
 log4js.configure({
     appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" }, console: { type: "stdout" } },
@@ -104,19 +106,31 @@ const sendIPtoProcess = (data) => {
     }
     else {
         try {
-        processList[assignedList[x][0]][0].send({ mode: "search", ip: data.ip, ports: data.ports, time: Date.now() })
-        processList[assignedList[x][0]][1].push(data.ip)
-        logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + data.ip)
-        assignedList[x][1].assigned++
-        assignedList[x][1].total++
-        currData.lastIp = data.ip
-        currData.total++
-        currData.assigned++
+            processList[assignedList[x][0]][0].send({ mode: "search", ip: data.ip, ports: data.ports, time: Date.now() })
+            processList[assignedList[x][0]][1].push(data.ip)
+            logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + data.ip)
+            assignedList[x][1].assigned++
+            assignedList[x][1].total++
+            currData.lastIp = data.ip
+            currData.total++
+            currData.assigned++
         }
         catch {
             crashedList.push(data)
         }
     }
+}
+
+const decreaseData = async (x, data) => {
+    currData.assigned--
+    assignedList[x][1].assigned--
+    assignedList[x][1].lastresponsetext = parseInt(Date.now()) - data.time
+    assignedList[x][1].currentIp = data.ip
+    var y = processList[assignedList[x][0]][1].findIndex((sarray) => {
+        const [number] = sarray
+        return number === data.ip
+    })
+    processList[assignedList[x][0]][1].splice(y, 1)
 }
 
 const createProcessConnection = (i) => {
@@ -127,28 +141,12 @@ const createProcessConnection = (i) => {
         })
         if (data.status === "success") {
             currData.finds++
-            currData.assigned--
             assignedList[x][1].finds++
-            assignedList[x][1].assigned--
-            assignedList[x][1].lastresponsetext = parseInt(Date.now()) - data.time
-            assignedList[x][1].currentIp = data.ip
-            var y = processList[assignedList[x][0]][1].findIndex((sarray) => {
-                const [number] = sarray
-                return number === data.ip
-            })
-            processList[assignedList[x][0]][1].splice(y, 1)
+            decreaseData(x, data)
             logger.debug(processList[assignedList[x][0]][0].pid + " processed data from ip: " + assignedList[x][1].currentIp);
         }
         else if (data.status === "error") {
-            currData.assigned--
-            assignedList[x][1].assigned--
-            assignedList[x][1].lastresponsetext = parseInt(Date.now()) - data.time
-            assignedList[x][1].currentIp = data.ip
-            var y = processList[assignedList[x][0]][1].findIndex((sarray) => {
-                const [number] = sarray
-                return number === data.ip
-            })
-            processList[assignedList[x][0]][1].splice(y, 1)
+            decreaseData(x, data)
             logger.debug(processList[assignedList[x][0]][0].pid + " failed to processing ip: " + assignedList[x][1].currentIp);
         }
         else if (data.status === "ping") {
@@ -159,7 +157,21 @@ const createProcessConnection = (i) => {
 }
 
 const serverScanner = async () => {
-    server.listen(servport, function () {
+    server.listen(servport, () => {
+        database.Connect().then(async () => {
+            var updateData = database.MongoFind({ databaseUpdate: { $exists: true } }, "info")
+            if (Date.now() - updateData?.databaseUpdate > 86400000) {
+                logger.log("Database is outdated. Updating...")
+                await mmdb.update()
+                logger.log("Database is updated.")
+                database.mongoUpdate({ databaseUpdate: updateData.databaseUpdate }, { $set: { databaseUpdate: Date.now() } }, "info")
+            } else if (updateData?.databaseUpdate === undefined) {
+                logger.log("Database is not found. Downloading...")
+                await mmdb.update()
+                logger.log("Database is downloaded.")
+                database.MongoDBWrite({ databaseUpdate: Date.now() }, "info")
+            }
+        })
         logger.info("Server listening on " + servport)
         logger.info("There is " + os.availableParallelism() + " thread available on this server.")
         currData.subprocesses = os.availableParallelism()
@@ -235,7 +247,7 @@ const serverScanner = async () => {
                 currData.crashedTotal = 0
                 var crashProc = cprocess.fork("./libs/crash.js")
                 crashProc.send({ list: crashedList })
-                crashProc.on("exit", () => {})
+                crashProc.on("exit", () => { })
                 crashedList = []
             }
         })

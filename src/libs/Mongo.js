@@ -64,6 +64,11 @@ async function fetchRandom(collection) {
     return cbase.aggregate([{ $sample: { size: 20 } }]).toArray()
 }
 
+async function mongoUpdate(filter, data, collection) {
+    var cbase = db.collection(collection)
+    return await cbase.updateOne(filter, data).then(result => result)
+}
+
 const stats = () => db.stats()
 
 module.exports = {
@@ -74,5 +79,6 @@ module.exports = {
     MongoLogger, 
     Connect, 
     fetchCustom, 
-    checkUserAgent
+    checkUserAgent,
+    mongoUpdate
 }
