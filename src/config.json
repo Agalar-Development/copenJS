@@ -13,7 +13,7 @@
         "processMaxBuffer": 1,
         "webhook": "",
         "mongo": {
-            "endpoint": "mongodb://username:password@domain?tls=false",
+            "endpoint": "mongodb://",
             "srv": true,
             "admin": {
                 "username": "",
@@ -25,12 +25,11 @@
             }
         },
         "cloudflare": {
-            "api": {
-                "endpoint": "https://api.cloudflare.com/client/v4/",
-                "api-token": "",
-                "zone": {
-                    "id": ""
-                }
+            "R2": {
+                "endpoint": "",
+                "cf-api-key": "",
+                "access-id": "",
+                "secret-access": ""
             }
         },
         "twitch": {
@@ -39,25 +38,9 @@
                 "client-id": "",
                 "client-secret": ""
             }
-        },
-        "ipinfo": {
-            "url": "https://ipinfo.io/data/free/country_asn",
-            "db-type": "mmdb",
-            "token": ""
         }
     },
     "chart": {
         "port": 9533
-    },
-    "timings": {
-        "maxresponse": 110000,
-        "avgresponse": 2000
-    },
-    "UI": {
-        "enable": true,
-        "web": {
-            "listen": 80
-        },
-        "websocket": 9534
     }
 }
