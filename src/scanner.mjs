@@ -8,7 +8,7 @@ import os from "os"
 import log4js from "log4js"
 import WebSocket from "ws"
 import database from "./libs/Mongo.js"
-import mmdb from "./libs/iplookup.mjs"
+import * as mmdb from "./libs/iplookup.mjs"
 
 log4js.configure({
     appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" }, console: { type: "stdout" } },
@@ -159,7 +159,7 @@ const createProcessConnection = (i) => {
 const serverScanner = async () => {
     server.listen(servport, () => {
         database.Connect().then(async () => {
-            var updateData = database.MongoFind({ databaseUpdate: { $exists: true } }, "info")
+            var updateData = await database.MongoFind({ databaseUpdate: { $exists: true } }, "info")
             if (Date.now() - updateData?.databaseUpdate > 86400000) {
                 logger.log("Database is outdated. Updating...")
                 await mmdb.update()

@@ -21,6 +21,7 @@
     "minecraft-protocol": "^1.41.1",
     "mongodb": "^5.1.0",
     "ora": "^7.0.1",
+    "uuid-buffer": "^1.0.3",
     "ws": "^8.16.0"
   }
 }

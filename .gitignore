@@ -5,3 +5,5 @@ build/
 node_modules/
 scan.json
 logs/
+config.json
+install.sh

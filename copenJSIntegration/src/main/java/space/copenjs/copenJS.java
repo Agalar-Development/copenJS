@@ -18,7 +18,12 @@ public class copenJS implements ModInitializer {
 	@Override
 	public void onInitialize() {;
 		LOGGER.info("Build Type: " + build + ((build == "dev") ? " Bypass Hash: " + bypassHash : ""));
-		DatabaseHelper.connectDatabase();
+		try {
+			DatabaseHelper.connectDatabase();
+		}
+		catch (Exception e) {
+			DatabaseHelper.isConnected = false;
+		}
 		mc = MinecraftClient.getInstance();
 		LOGGER.info("copenJS is starting...");
 	}
