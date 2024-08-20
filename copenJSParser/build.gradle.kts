@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.crawleyyou"
-version = "1.0-SNAPSHOT"
+version = "1.3-DEV"
 
 repositories {
     mavenCentral()
@@ -37,7 +37,7 @@ tasks.create("BuildFatJar", Jar::class) {
 
 tasks.withType(Jar::class) {
     manifest {
-        attributes["Manifest-Version"] = "1.0"
+        attributes["Manifest-Version"] = "1.3"
         attributes["Main-Class"] = "io.crawleyyou.MainKt"
     }
 }
