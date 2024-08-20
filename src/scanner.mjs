@@ -6,8 +6,6 @@ import spinners from "cli-spinners"
 import ora from 'ora'
 import os from "os"
 import log4js from "log4js"
-import WebSocket from "ws"
-
 log4js.configure({
     appenders: { copenjs: { type: "file", filename: process.cwd() + "/logs/" + Date.now() + ".log" } },
     categories: { default: { appenders: ["copenjs"], level: "debug" } },
@@ -65,38 +63,6 @@ const getColor = (data, mode) => {
     }
 }
 
-const sendDatatoUI = (data) => {
-    if (config.UI.enable) {
-        ws.send(data)
-    }
-}
-
-const sendIPtoProcess = (data) => {
-    assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
-    var x = 0
-    while (assignedList[x][1]?.currentPings > 5 && x < os.availableParallelism()) {
-        x++
-    }
-    if (x === os.availableParallelism()) {
-        logger.fatal("All Processes are down!")
-    }
-    else {
-        try {
-        processList[assignedList[x][0]][0].send({ mode: "search", ip: data.ip, ports: data.ports, time: Date.now() })
-        processList[assignedList[x][0]][1].push(data.ip)
-        logger.debug(processList[assignedList[x][0]][0].pid + " assigned to " + data.ip)
-        assignedList[x][1].assigned++
-        assignedList[x][1].total++
-        currData.lastIp = data.ip
-        currData.total++
-        currData.assigned++
-        }
-        catch {
-            crashedList.push(data)
-        }
-    }
-}
-
 const createProcessConnection = (i) => {
     processList[i][0].on("message", (data) => {
         var x = assignedList.findIndex((sarray) => {
@@ -120,10 +86,10 @@ const createProcessConnection = (i) => {
     })
 }
 
-const serverScanner = async () => {
+const Main = async () => {
     server.listen(servport, function () {
-        logger.info("Server listening on " + servport)
-        logger.info("There is " + os.availableParallelism() + " thread available on this server.")
+        console.log("Server listening on " + servport)
+        console.log("There is " + os.availableParallelism() + " thread available on this server.")
         currData.subprocesses = os.availableParallelism()
         for (var i = 0; i < os.availableParallelism(); i++) {
             processList.push([cprocess.fork("./libs/thread.mjs", [i]), []])
@@ -188,15 +154,8 @@ const serverScanner = async () => {
             currData.tcpRestarts++
         })
         socket.on('end', function () {
-            logger.warn("The client end")
-            if (!crashedList.length == 0) {
-                logger.info("There is a list of ips that sent to the processes which is crashed. Re-running " + currData.crashedTotal + " ips.")
-                currData.crashedTotal = 0
-                var crashProc = cprocess.fork("./libs/crash.js")
-                crashProc.send({ list: crashedList })
-                crashProc.on("exit", () => {})
-                crashedList = []
-            }
+            console.log("Client disconnected")
+            logger.warn("The client end ")
         })
         socket.on("data", async function (ip) {
             assignedList.sort((a, b) => { return a[1].assigned - b[1].assigned })
@@ -221,79 +180,17 @@ const serverScanner = async () => {
     })
 }
 
-const startProcess = async (startup, cwd) => {
-    cwd = cwd || process.cwd()
-    return exec(startup, { cwd: cwd, maxBuffer: config.scanner.processMaxBuffer * 1024 * 1024 * 1024 })
-}
-
-const Main = async () => {
-    switch (config.scanner.mode) {
-        case "default":
-            startProcess("masscan").then((data) => {
-                data.stdout.on("data", (data) => {
-                    logger.debug(data)
-                    if (data.includes("usage: masscan") && data.includes("examples:")) {
-                        logger.debug("masscan is detected.")
-                        masscanStatus = true
-                    }
-                })
-                data.on("exit", () => {
-                    logger.debug("Alias check ended")
-                    if (!masscanStatus) {
-                        logger.info("masscan is not detected trying to install masscan with JDK 17")
-                        startProcess("sudo apt-get --assume-yes install git make gcc openjdk-17-jdk openjdk-17-jre && git clone https://github.com/robertdavidgraham/masscan && cd masscan && make && make install && install -pDm755 bin/masscan /usr/bin/masscan && cd .. && masscan", (process.cwd().split("/src")[0])).then((data) => {
-                            data.stdout.on("data", (data) => {
-                                logger.debug(data)
-                                if (data.includes("usage: masscan") && data.includes("examples:")) {
-                                    logger.info("Installation of masscan is successful!")
-                                    masscanStatus = true
-                                }
-                            })
-                            data.on("exit", () => {
-                                logger.debug("Install process is ended")
-                                if (!masscanStatus) {
-                                    logger.error("An error occured while installing masscan! Please install it manually with jdk17 and select mode masscan")
-                                }
-                                else {
-                                    logger.debug("Starting masscan")
-                                    startMasscan()
-                                }
-                            })
-                        })
-                    }
-                    else {
-                        logger.debug("Starting masscan")
-                        startMasscan()
-                    }
-                })
-            })
-            break;
-        case "masscan":
-            logger.debug("Starting masscan")
-            startMasscan()
-            break;
-        case "server":
-            logger.debug("Starting Server Scanner")
-            serverScanner()
-            break;
-        default:
-            logger.error("Invalid mode! Please check your config.json file.")
-    }
-}
-
-if (config.UI.enable) {
-    var i = 0
-    startProcess("sudo node server.mjs", process.cwd().split("/src")[0] + "/webUI").then((process) => {
-        process.stdout.on("data", (data) => {
-            logger.info(data)
-            if (i == 0) {
-                i++
-                ws = new WebSocket("ws://localhost:" + config.UI.websocket)
-                ws.onopen = () => {
-                    sendDatatoUI("server")
-                    Main()
-                }
-            }
-        })
+const startParser = async (startup) => {
+    exec(startup, (error, stderr) => {
+        if (error) {
+            console.error(`exec error: ${error}`);
+            logger.error("exec error: " + error)
+            return;
+        }
+        console.error(`stderr: ${stderr}`);
+        logger.error("stderr: " + stderr)
     })
-} else Main()
+}
+
+
+Main()

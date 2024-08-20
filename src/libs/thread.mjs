@@ -2,7 +2,10 @@ import protocol from './Protocol.js'
 import webhook from './webhookHelper.mjs'
 import Database from './Mongo.js'
 <<<<<<< HEAD
+<<<<<<< HEAD
 import iplookup from './iplookup.mjs'
+=======
+>>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
 =======
 >>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
 
@@ -17,6 +20,7 @@ process.on("message", (data) => {
             break;
         case "search":
             var ip = data.ip
+<<<<<<< HEAD
 <<<<<<< HEAD
             var ports = data.ports
             ports.forEach((port) => {
@@ -59,6 +63,8 @@ process.on("message", (data) => {
                 } catch (err) {
                     console.log("An unknown error occured")
 =======
+=======
+>>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
             try {
                 protocol.GetServerData(ip.toString(), 25565).then(async (data) => {
                     try {
@@ -89,6 +95,9 @@ process.on("message", (data) => {
                         process.send({ ip: ip.toString(), status: "success", thread: currentThread, time: time })
                     }
                 }).catch((err) => {
+<<<<<<< HEAD
+>>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
+=======
 >>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
                     //console.log(err)
                     process.send({ ip: ip.toString(), status: "error", thread: currentThread, time: time })
