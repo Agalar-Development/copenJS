@@ -3,25 +3,28 @@ const {
 } = require('mongodb');
 const System = require('./Log.js');
 const config = require('../config.json');
-const client = new MongoClient(config.Scanner.mongolink)
+var connectionString = config.scanner.mongo.endpoint.replace("username", config.scanner.mongo.admin.username).replace("password", config.scanner.mongo.admin.password)
+const client = new MongoClient((config.scanner.mongo.srv === true) ? connectionString.replace("mongodb", "mongodb+srv") : connectionString)
 const db = client.db("Scanner")
 
-function Connect() {
+const Connect = () => new Promise((resolve, reject) => {
     try {
         client.connect()
         System.Log("green", "Successfully connected to MongoDB via Library.");
+        resolve()
     } catch (err) {
         System.Log("red", "Failed to connect to MongoDB.");
         console.log(err)
+        reject()
     }
-}
+})
 async function MongoLogger(data, collection) {
     var cbase = db.collection(collection)
     var result = await cbase.find({
-        IP: data.IP,
+        ip: data.ip,
     }).toArray().then(result => result[0])
     if (result == undefined) {
-       // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
+        // System.Log("yellow", "No Data found in MongoDB. Inserting Data...");
         MongoDBWrite(data, collection)
     } else {
         //System.Log("yellow", "Server data found in MongoDB. Server IP: " + result.IP);

@@ -10,7 +10,7 @@ process.on("message", (data) => {
     var time = data.time
     switch (data.mode) {
         case "ping":
-            process.send({ status: "ping", thread: currentThread, time: time })
+            process.send({status: "ping", thread: currentThread, time: time })
             break;
         case "search":
             var ip = data.ip
@@ -54,9 +54,8 @@ process.on("message", (data) => {
                     })
                 } catch (err) {
                     console.log("An unknown error occured")
-                    process.send({ ip: ip.toString(), status: "error", thread: currentThread, time: time })
-                }
-            })
+                process.send({ ip: ip.toString(), status: "error", thread: currentThread, time: time })
+            }})
             break;
         default:
             return 0
