@@ -46,8 +46,6 @@ async function MongoFind(data, collection) {
     return await cbase.find(data).toArray().then(result => result[0])
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 async function fetchCustom(data, collection, skip) {
     var cbase = db.collection(collection)
     return await cbase.find(data).skip(skip).limit(20).toArray().then(result => result)
@@ -81,15 +79,3 @@ module.exports = {
     checkUserAgent,
     mongoUpdate
 }
-=======
-module.exports.MongoFind = MongoFind
-module.exports.MongoLogger = MongoLogger;
-module.exports.MongoDBWrite = MongoDBWrite;
-module.exports.Connect = Connect;
->>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)
-=======
-module.exports.MongoFind = MongoFind
-module.exports.MongoLogger = MongoLogger;
-module.exports.MongoDBWrite = MongoDBWrite;
-module.exports.Connect = Connect;
->>>>>>> parent of 9fac3b7 (Merge pull request #10 from Agalar-Development/dev)

@@ -1,10 +1,63 @@
 {
-    "Scanner": {
-		"tcp-servport": 9532,
-        "webhook": "Insert Webhook Here",
-        "mongolink": "mongodb://"
+    "masscan": {
+        "port": 25565,
+        "rate": 1200000,
+        "outputFile": "scan.json",
+        "excludeFile": "exclude.conf"
     },
-    "Chart": {
+    "scanner": {
+        "mode": "default",
+        "tcp-servport": 9532,
+        "logger": "info",
+        "parserMaxRam": 5,
+        "processMaxBuffer": 1,
+        "webhook": "",
+        "mongo": {
+            "endpoint": "mongodb://username:password@domain?tls=false",
+            "srv": true,
+            "admin": {
+                "username": "",
+                "password": ""
+            },
+            "read-only": {
+                "username": "",
+                "password": ""
+            }
+        },
+        "cloudflare": {
+            "api": {
+                "endpoint": "https://api.cloudflare.com/client/v4/",
+                "api-token": "",
+                "zone": {
+                    "id": ""
+                }
+            }
+        },
+        "twitch": {
+            "endpoint": "https://api.twitch.tv/helix/",
+            "app": {
+                "client-id": "",
+                "client-secret": ""
+            }
+        },
+        "ipinfo": {
+            "url": "https://ipinfo.io/data/free/country_asn",
+            "db-type": "mmdb",
+            "token": ""
+        }
+    },
+    "chart": {
         "port": 9533
+    },
+    "timings": {
+        "maxresponse": 110000,
+        "avgresponse": 2000
+    },
+    "UI": {
+        "enable": true,
+        "web": {
+            "listen": 80
+        },
+        "websocket": 9534
     }
 }
