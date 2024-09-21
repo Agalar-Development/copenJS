@@ -1,3 +1,4 @@
+<p align="center"><b>WARNING: Educational purposes only.</b></p>
 <p align="center">
   <img src="https://user-images.githubusercontent.com/60201017/229349090-f355267d-01dc-4fd7-a30a-5de319315140.png", width="256" height="256" />
 </p>
@@ -7,7 +8,7 @@
 # Requirements 
 - [NodeJS v18+](https://nodejs.org/en/download) and [Java](https://www.java.com/tr/download/)
 
-- Minimum 4+ GB Ram
+- Minimum 4+ GB Ram (didnt test with v2 but prob needs less ram)
 # Getting Started
 Install Node Modules with:
  ```bash 
@@ -16,39 +17,7 @@ Install Node Modules with:
 
 # Usage
 
-## Method 1 (If you have scan.json)
-
- Add your scan.json in the repository folder then head into the src folder and start the scanner with 
- ```bash
- node scanner.js
- ```
-
- ## Method 2 (If you dont have scan.json)
-
- First of all, you need a Linux Server for this method. (I tried this method with Ubuntu Server)
-
- When the server is ready, we need to clone masscan repo and build masscan via these commands:
-  ```bash
-  sudo apt-get --assume-yes install git make gcc
-git clone https://github.com/robertdavidgraham/masscan
-cd masscan
-make
-```
-then 
- ```bash
-make install
-```
-If this returns something like this: "install -pDm755 bin/masscan /usr/bin/masscan" you can directly copy and paste it into the terminal.
-
-## Try using: 
-```bash
-masscan
-```
-If this does not return anything restart the server if it returns something head back to the repository folder then start scanning the entire internet with this command:
-```bash
-masscan 0.0.0.0/0 -p25565 -oJ scan.json --max-rate 1200000 --excludefile exclude.conf
-```
-When the scan is done you can do the same thing with Method 1.
+Change the `adminName` and `adminPass` sections in the install.sh & configure the `config.json` file in src then run `install.sh` it with sudo.
 
 # Development
 You need any JDK 17 for developing the parser also you can use the same NodeJS version for developing JavaScript.
