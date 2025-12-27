@@ -5,6 +5,8 @@
 <h1 align="center"> copenJS </h1>
 <p align="center"><i>This project started as a joke but we are here now.</i></p>
 
+[Support Server](https://discord.gg/5trvjuqgm8)
+
 # Requirements 
 - [NodeJS v18+](https://nodejs.org/en/download) (DONT USE NodeJS 22) and [Java](https://www.java.com/tr/download/)
 
