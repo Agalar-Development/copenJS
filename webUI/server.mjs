@@ -15,6 +15,7 @@ database.Connect().then(() => {
     })
 })
 let server
+let latestActive = []
 
 const pushClients = (wsc, msg) => {
     wsc.removeListener("message", pushClients)
@@ -38,7 +39,14 @@ const establishConn = () => {
 }
 
 wss.on('connection', (wsc) => {
-    wsc.on('message', (msg) => pushClients(wsc, msg))
+    wsc.on('message', (msg) => {
+        var parsedData = JSON.parse(msg.toString())
+        if (parsedData?.type === "latestActive") {
+            latestActive = parsedData.data
+        } else {
+            pushClients(wsc, msg)
+        }
+    })
 })
 
 var app = express()
@@ -71,6 +79,10 @@ app.post("/api/database/fetch", async (req, res) => {
 
 app.get("/api/database/stats", async (req, res) =>{
     res.status(200).jsonp(await database.stats())
+})
+
+app.get("/api/database/randomactive", async (req, res) => {
+    res.status(200).jsonp(JSON.stringify({data: latestActive}))
 })
 
 app.get("/api/database/info", async (req, res) => {

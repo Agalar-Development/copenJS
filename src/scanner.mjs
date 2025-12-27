@@ -35,6 +35,7 @@ let currData = {
 
 var colors = ["\x1b[31m", "\x1b[32m", "\x1b[33m"]
 
+let activeLastHundred = []
 let processList = []
 let assignedList = []
 let crashedList = []
@@ -144,6 +145,12 @@ const createProcessConnection = (i) => {
             assignedList[x][1].finds++
             decreaseData(x, data)
             logger.debug(processList[assignedList[x][0]][0].pid + " processed data from ip: " + assignedList[x][1].currentIp);
+            if (data.overOne) {
+                if (activeLastHundred.length >= 100) {
+                    activeLastHundred.shift()
+                }
+                activeLastHundred.push(assignedList[x][1].currentIp)
+            }
         }
         else if (data.status === "error") {
             decreaseData(x, data)
@@ -197,6 +204,7 @@ const serverScanner = async () => {
                     temp.push(data[1])
                 })
                 sendDatatoUI(JSON.stringify({ mode: "copenJS", main: currData, subproc: temp }))
+                sendDatatoUI(JSON.stringify({ type: "latestActive", data: activeLastHundred }))
                 text.text = defaultText
                 currData.totalLast = currData.total
             }, 500)
