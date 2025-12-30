@@ -76,7 +76,6 @@ const ProtocolTOVersion = async (protocol) => new Promise((resolve, reject) => {
 
 const checkOnlineStatus = async (ip, port) => new Promise(async (resolve, reject) => {
     const socket = net.createConnection({ host: ip, port: port }, async () => {
-        console.log("Connected to server")
         var portBuffer = Buffer.alloc(2)
         portBuffer.writeUInt16BE(port)
         await createPacketWithoutCompression(0x00, Buffer.concat([
@@ -87,19 +86,16 @@ const checkOnlineStatus = async (ip, port) => new Promise(async (resolve, reject
             writeVarInt(2)
         ]))
             .then(async (packet) => {
-                console.log("Handshake packet sent.")
                 socket.write(packet)
             })
         await createPacketWithoutCompression(0x00, Buffer.concat([
             writeVarInt("copenJSv2".length),
             Buffer.from("copenJSv2")
         ])).then(async (packet) => {
-            console.log("Login Start packet sent.")
             socket.write(packet)
         })
     })
     socket.on('error', () => {
-        console.log("Error connecting to server")
         resolve(null)
     })
     let receiveBuffer = Buffer.alloc(0);
@@ -140,18 +136,15 @@ const checkOnlineStatus = async (ip, port) => new Promise(async (resolve, reject
 
             if (packetId === 0x03) {
                 compressionThreshold = readVarInt(packetData, 0).value
-                console.log("Compression enabled:", compressionThreshold)
             }
 
             else if (packetId === 0x01) {
-                console.log("Received Encryption Request (Online Mode)")
                 socket.end()
                 resolve(true)
                 return
             }
 
             else if (packetId === 0x02) {
-                console.log("Received Login Success (Offline Mode)")
                 socket.end()
                 resolve(false)
                 return
@@ -163,8 +156,7 @@ const checkOnlineStatus = async (ip, port) => new Promise(async (resolve, reject
         }
     })
     socket.on('end', () => {
-        console.log("Connection ended"),
-            resolve(null)
+        resolve(null)
     })
 })
 
