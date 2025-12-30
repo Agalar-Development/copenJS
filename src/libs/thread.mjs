@@ -41,6 +41,7 @@ process.on("message", (data) => {
                                 onlinePlayer: data.players.online,
                                 players: data.players.sample,
                                 modinfo: data.modinfo,
+                                isOnlineMode: data.isOnlineMode,
                                 ipAPI: ipAPI,
                             }, "Servers")
                         }

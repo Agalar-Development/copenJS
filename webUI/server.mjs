@@ -73,16 +73,26 @@ app.post("/api/database/fetch", async (req, res) => {
             temp.push({ favicon: (!data.favicon?.includes("https")) ? data.favicon : data.faviconBase64, motdHTML: (data.motd == null) ? null : motdParser.JSONToHTML(data.motd), ip: data.ip, version: data.version, protocolversion: data.protocolVersion, latency: (data.latency == null) ? 0 : data.latency, currentplayers: data.onlinePlayer, maxplayers: data.maxPlayer })
         })
     }).finally(() => {
-        res.status(200).jsonp({data: temp})
+        res.status(200).jsonp({ data: temp })
     })
 })
 
-app.get("/api/database/stats", async (req, res) =>{
+app.get("/api/database/stats", async (req, res) => {
     res.status(200).jsonp(await database.stats())
 })
 
 app.get("/api/database/randomactive", async (req, res) => {
-    res.status(200).jsonp(JSON.stringify({data: latestActive}))
+    try {
+        var userAgent = (req.headers["user-agent"]).split("/")
+        if (userAgent[0] === "copenJSAgent" && await database.checkUserAgent(userAgent[1])) {
+            res.status(200).jsonp(JSON.stringify({ data: latestActive }))
+        } else {
+            res.status(404).send("404 Not Found")
+        }
+    }
+    catch (err) {
+        res.status(404).send("404 Not Found")
+    }
 })
 
 app.get("/api/database/info", async (req, res) => {
